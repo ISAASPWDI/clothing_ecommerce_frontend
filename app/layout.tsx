@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ReduxProvider from "./ReduxProvider";
+import SessionProviderWrapper from "@/app/SessionProviderWrapper";
+import ApolloWrapper from "./ApolloWrapper";
+import { ProductFiltersProvider } from "./hooks/ProductFiltersContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,15 +24,37 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-[#302f31]`} suppressHydrationWarning={true}
       >
-        {children}
+        {/* No necesitas "use client" en RootLayout */}
+        <ReduxProvider>
+          
+          <SessionProviderWrapper>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              
+              <ApolloWrapper>
+                <ProductFiltersProvider>{children}</ProductFiltersProvider>
+              </ApolloWrapper>
+            </ThemeProvider>
+          </SessionProviderWrapper>
+        </ReduxProvider>
       </body>
     </html>
   );

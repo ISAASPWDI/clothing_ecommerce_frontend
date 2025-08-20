@@ -1,0 +1,154 @@
+import { gql } from "@apollo/client";
+
+//USUARIOS
+export const CREATE_USER = gql`
+  mutation CreateUser($data: CreateUserInput!) {
+    createUser(data: $data) {
+      id
+      firstName
+      lastName
+      phone
+      email
+      image
+      rol
+      authType
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const UPDATE_USER = gql`
+  mutation UpdateUser($data: UpdateUserInput!) {
+    updateUser(data: $data) {
+      id
+      firstName
+      lastName
+      email
+      phone
+      authType
+      rol
+    }
+  }
+`;
+export const LOGIN_USER = gql`
+  query($email: String!, $password: String) {
+    findUserByEmail(email: $email, password: $password) {
+      id
+      firstName
+      lastName
+      name
+      email
+      image
+      rol
+      authType
+      phone
+      token
+    }
+  }
+`;
+export const FIND_USER_BY_EMAIL = gql`
+  query getUserByEmail($email: String!) {
+    getUserByEmail(email: $email) {
+      id
+      firstName
+      lastName
+      name
+      email
+      image
+      rol
+      authType
+      phone
+      token
+    }
+  }
+`;
+
+//PRODUCTOS
+export const GET_ALL_CATEGORIES = gql`
+  query{
+    getAllCategories {
+      id
+      name
+      metaTitle
+      metaDescription
+      metaKeywords
+      slug
+    }
+  }
+
+`;
+export const GET_ALL_COLORS = gql`
+  query{
+    getAllColors {
+      id
+      color
+    }
+  }
+
+`;
+export const GET_ALL_AGES = gql`
+  query{
+    getAllAges {
+      id
+      range
+    }
+  }
+
+`;
+export const GET_ALL_GENRES = gql`
+  query GetAllGenres {
+    getAllGenres {
+      id
+      genre
+    }
+  }
+`;
+export const GET_ALL_SIZES = gql`
+  query{
+    getAllSizes {
+      id
+      size
+    }
+  }
+`;
+export const FIND_PRODUCTS_WITH_GENRES = gql`
+  query FindProductsByGenre($id: Int!) {
+    findAllProducts(relation: genre, id: $id) {
+      id
+      name
+      price
+      genres {
+        id
+        genre
+      }
+    }
+  }
+`;
+export const FIND_PRODUCTS_WITH_CATEGORIES = gql`
+  query FindProductsByGenre($id: Int!) {
+    findAllProducts(relation: category, id: $id) {
+      id
+      name
+      price
+      categories {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_RELATION = gql`
+  query GetProductsByRelation($filterData: [FilterDataInput!]!, $page: Int, $maxPrice: Float, $minPrice: Float, $sortBy: String, $searchTerm: String) {
+    findProductsByRelation(filterData: $filterData, page: $page, maxPrice: $maxPrice, minPrice: $minPrice, sortBy: $sortBy, searchTerm: $searchTerm) {
+      products {
+        id
+        name
+        price
+        description
+      }
+      isProducts
+    }
+  }
+`;
+
