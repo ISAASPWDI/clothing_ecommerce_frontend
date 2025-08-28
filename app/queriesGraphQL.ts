@@ -145,6 +145,7 @@ export const GET_PRODUCTS_BY_RELATION = gql`
         id
         name
         price
+        slug
         description
       }
       isProducts
@@ -152,3 +153,66 @@ export const GET_PRODUCTS_BY_RELATION = gql`
   }
 `;
 
+// New queries for details 
+export const GET_PRODUCT_BY_SLUG = gql`
+  query GetProduct($identifier: String!) {
+    getProduct(identifier: $identifier) {
+      id
+      name
+      slug
+      price
+      description
+      quantity
+      reviewCount
+      metaTitle
+      metaDescription
+      metaKeywords
+      colors {
+        id
+        color
+      }
+      sizes {
+        id
+        size
+      }
+      categories {
+        id
+        name
+        slug
+      }
+      genres {
+        id
+        genre
+      }
+      ages {
+        id
+        range
+      }
+      details {
+        id
+        key
+        value
+      }
+      images {
+        id
+        imagePath
+        alt
+        sortOrder
+        isMain
+      }
+    }
+  }
+`;
+
+// Query para productos relacionados
+export const GET_RELATED_PRODUCTS = gql`
+  query GetRelatedProducts($productId: Int!, $limit: Int = 4) {
+    getRelatedProducts(productId: $productId, limit: $limit) {
+      id
+      name
+      slug
+      price
+      description
+    }
+  }
+`;

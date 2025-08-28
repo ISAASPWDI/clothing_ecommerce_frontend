@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-
+import Image from 'next/image'
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
@@ -13,6 +13,7 @@ import { StatusStateOptions, useSwiper } from '../../hooks/useSwiper';
 import { StatusState } from '../../components/StatusState';
 import { Category, Genre, Product } from '@/types/product';
 import SkeletonProductCard from './SkeletonProductCard';
+import { useProductContext } from '@/contexts/ProductContext';
 
 interface SwiperConfigOptions {
   title: string;
@@ -34,6 +35,7 @@ interface SwiperConfigOptions {
 }
 
 export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfigOptions) {
+  const { navigateToProduct } = useProductContext();
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const prevRef = useRef<HTMLButtonElement | null>(null);
   const nextRef = useRef<HTMLButtonElement | null>(null);
@@ -196,7 +198,15 @@ export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfig
                 >
                   <div className="bg-white shadow-md rounded-lg flex flex-col h-[543px] transition-all duration-300 hover:shadow-xl hover:scale-105">
                     <div className="h-80 bg-gray-200 mb-4 rounded flex items-center justify-center overflow-hidden">
-                      {/* Imagen del producto aquí */}
+                      {product.images && product.images.length > 0 ? (
+                        <Image
+                          src={product.images[0].imagePath}
+                          alt={product.images[0].alt || product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-400">Sin imagen</span>
+                      )}
                     </div>
                     <div className="px-3 flex-grow flex flex-col justify-between">
                       <div>
@@ -207,7 +217,10 @@ export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfig
                           ${product.price.toFixed(2)}
                         </p>
                       </div>
-                      <button className="mt-4 w-full bg-[#516559] text-white py-2 px-4 rounded transition-colors duration-300 hover:bg-[#3d4f41]">
+                      <button
+                        onClick={() => navigateToProduct(product)}
+                        className="mt-4 w-full bg-[#516559] text-white py-2 px-4 rounded transition-colors duration-300 hover:bg-[#3d4f41]"
+                      >
                         Ver Producto
                       </button>
                     </div>

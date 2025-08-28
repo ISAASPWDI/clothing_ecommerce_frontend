@@ -7,44 +7,46 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useProductFilters } from "../hooks/ProductFiltersContext";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 export default function NavBar() {
     const { searchTerm, setSearchTerm } = useProductFilters();
     const { data: session } = useSession()
-    console.log(session);
-    console.log(session?.user.rol);
     const pathname = usePathname();
     const router = useRouter()
     const [menuActive, setMenuActive] = useState<boolean>(true);
-
     const handleRouteChange = (): void => {
         localStorage.setItem("previousRoute", pathname);
         router.push("/login");
     }
     const { setTheme } = useTheme();
-
+    const totalItems = useSelector((state: RootState) => state.cart.totalItems);
     const handleMenu = (): void => {
         setMenuActive((active: boolean) => !active);
     };
+
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchTerm.trim()) {
-            router.push('/shop');
+            
+            router.push(`/shop?searchTerm=${encodeURIComponent(searchTerm.trim())}`);
         }
     };
 
     const handleIconClick = () => {
         if (searchTerm.trim()) {
-            router.push('/shop');
+            router.push(`/shop?searchTerm=${encodeURIComponent(searchTerm.trim())}`);
         }
     };
+
     return (
         <>
             <header className="relative">
@@ -59,7 +61,7 @@ export default function NavBar() {
                         </Link>
                     </div>
                     {/* Menú hamburguesa disponible en móviles */}
-                    <div className="flex md:hidden">
+                    <div className="flex lg:hidden">
                         <button
                             onClick={handleMenu}
                             className="group duration-200 ease-in rounded-sm cursor-pointer hover:bg-purple-200/70 dark:hover:bg-purple-700  p-2"
@@ -102,7 +104,7 @@ export default function NavBar() {
                         </button>
                     </div>
                     {/* Navegación: Inicio, Tienda y Acerca de (visibles en md hacia arriba) */}
-                    <nav className="hidden md:flex">
+                    <nav className="hidden lg:flex">
                         <ul className="flex items-center">
                             <li className={`relative group font-medium me-10 ${pathname === "/home" ? "text-purple-700" : ""}`}>
                                 <Link href="/home">
@@ -168,9 +170,9 @@ export default function NavBar() {
 
                     </nav>
                     {/* Navegación: Account y Cart (visibles en md hacia arriba) */}
-                    <nav className="hidden md:flex">
+                    <nav className="hidden lg:flex">
                         <ul className="flex">
-                            <form onSubmit={handleSearchSubmit} className="relative flex-grow ms-10 me-0 md:me-10">
+                            <form onSubmit={handleSearchSubmit} className="relative flex-grow ms-3 me-0 md:me-5">
                                 <input
                                     type="text"
                                     placeholder="Buscar productos..."
@@ -186,7 +188,7 @@ export default function NavBar() {
                                     <Search size={18} className="text-zinc-400" />
                                 </button>
                             </form>
-                            <li className="w-10 h-10 me-10">
+                            <li className="w-10 h-10 me-5">
                                 {session && session.user?.image ?
                                     <Button className="shadow-none bg-white hover:bg-white cursor-pointer w-full h-full p-0">
                                         {/* Link rodea solo la imagen */}
@@ -222,24 +224,33 @@ export default function NavBar() {
                             </li>
                             <li>
                                 <Link href="/cart">
-                                    <Button className="shadow-none rounded-sm bg-transparent hover:bg-purple-200/70 dark:hover:bg-purple-700 cursor-pointer">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="lucide lucide-shopping-cart text-purple-700 dark:text-white"
-                                        >
-                                            <circle cx="8" cy="21" r="1"></circle>
-                                            <circle cx="19" cy="21" r="1"></circle>
-                                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                                        </svg>
-                                    </Button>
+                                    <div className="relative">
+                                        <div className="absolute z-100">
+                                            <Button className="shadow-none rounded-sm bg-transparent hover:bg-transparent dark:hover:bg-purple-700 cursor-pointer">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="lucide lucide-shopping-cart text-purple-700 dark:text-white"
+                                                >
+                                                    <circle cx="8" cy="21" r="1"></circle>
+                                                    <circle cx="19" cy="21" r="1"></circle>
+                                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                                                </svg>
+                                            </Button>
+                                        </div>
+                                        { totalItems ? <div className="absolute -top-2 -right-12 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                            {totalItems}
+                                        </div> : <div className="hidden"></div>}
+
+                                    </div>
+
                                 </Link>
                             </li>
                         </ul>
@@ -248,7 +259,7 @@ export default function NavBar() {
             </header>
             {/* Nuevo div agregado después del contenedor fixed para móviles */}
             <div
-                className={`md:hidden fixed top-16 left-0 w-full bg-white dark:bg-[#302f31] z-40 transition-transform duration-500 ${menuActive ? "-translate-y-full scale-70" : "translate-y-0"
+                className={`lg:hidden fixed top-16 left-0 w-full bg-white dark:bg-[#302f31] z-40 transition-transform duration-500 ${menuActive ? "-translate-y-full scale-70" : "translate-y-0"
                     }`}>
                 <nav className="py-4 px-4 border-t border-t-gray-300 dark:border-t-purple-700">
                     <ul className="flex flex-col">
