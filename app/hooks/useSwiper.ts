@@ -1,6 +1,6 @@
 import { GetGenresData, GetProductsWithGenresData, GetAllCategoriesResponse, GetProductsWithCategoriesData } from "@/types/product";
 import { ApolloError, useLazyQuery, useQuery } from "@apollo/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FIND_PRODUCTS_WITH_CATEGORIES, FIND_PRODUCTS_WITH_GENRES, GET_ALL_CATEGORIES, GET_ALL_GENRES } from "../queriesGraphQL";
 export interface StatusStateOptions {
   loading: boolean;
@@ -38,13 +38,13 @@ export const useSwiper = (options?: UseSwiperOptions) => {
   // Productos por género
 
 
-  // Logs
-  useEffect(() => {
-    if (dataProductsByGenre) console.log(dataProductsByGenre);
-    console.log(dataGenres);
-    console.log(dataCategories);
+  // // Logs
+  // useEffect(() => {
+  //   if (dataProductsByGenre) console.log(dataProductsByGenre);
+  //   console.log(dataGenres);
+  //   console.log(dataCategories);
     
-  }, [dataProductsByGenre]);
+  // }, [dataProductsByGenre, dataCategories, dataGenres]);
 
   // Cargar inicial dinámico
   useEffect(() => {

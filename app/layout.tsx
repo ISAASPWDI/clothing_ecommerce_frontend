@@ -6,6 +6,7 @@ import ReduxProvider from "./ReduxProvider";
 import SessionProviderWrapper from "@/app/SessionProviderWrapper";
 import ApolloWrapper from "./ApolloWrapper";
 import { ProductFiltersProvider } from "./hooks/ProductFiltersContext";
+import { ProductProvider } from "@/contexts/ProductContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,7 +51,10 @@ export default function RootLayout({
             >
               
               <ApolloWrapper>
+                <ProductProvider>
                 <ProductFiltersProvider>{children}</ProductFiltersProvider>
+                </ProductProvider>
+
               </ApolloWrapper>
             </ThemeProvider>
           </SessionProviderWrapper>

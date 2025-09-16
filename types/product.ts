@@ -34,8 +34,11 @@ type Detail = {
 };
 
 type Image = {
-  id: number;
-  url: string;
+  id: number; 
+  imagePath: string;
+  alt?: string | null;
+  sortOrder: number; 
+  isMain: boolean;  
 };
 
 export type Product = {
@@ -82,4 +85,12 @@ export interface GetProductsByRelation {
     products: Product[];
     isProducts: boolean;
   };
+}
+// Nuevos tipos para la página de detalles
+export interface GetProductBySlugResponse {
+  getProduct: Product;
+}
+
+export interface GetRelatedProductsResponse {
+  getRelatedProducts: Product[];
 }

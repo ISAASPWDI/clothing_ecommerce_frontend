@@ -17,6 +17,7 @@ import '@splidejs/react-splide/css';
 
 import { useSwiper } from "../hooks/useSwiper";
 import { SplideOptions } from "@/types/libraries";
+import Link from "next/link";
 
 export default function HomePage() {
   const { data: session } = useSession()
@@ -146,18 +147,7 @@ export default function HomePage() {
           dataBody={swiperDataGenres} // Pasa todo el hook, no solo los productos
         />
 
-        <div className="flex flex-col justify-center items-center">
-          {value}
-          <button className="mb-4 p-4  bg-red-300" onClick={() => dispatch(increment())}>
-            +1
-          </button>
-          <button className="mb-4 p-4  bg-blue-300" onClick={() => dispatch(decrement())}>
-            -1
-          </button>
-          <button className="mb-4 p-4  bg-green-300" onClick={() => dispatch(incrementByAmount(value))}>
-            increment by value
-          </button>
-        </div>
+
         <div className="relative min-h-[400px] md:min-h-screen bg-[url('../public/find-your-fit-mobile.webp')] lg:bg-[url('../public/find-your-fit.webp')] bg-cover bg-center bg-no-repeat lg:mb-10">
 
           <div className="absolute inset-0 bg-black/20"></div>
@@ -193,7 +183,7 @@ export default function HomePage() {
           dataTitle={swiperDataCategories.dataCategories}
           dataBody={swiperDataCategories} // Pasa todo el hook, no solo los productos
         />
-        <div className="bg-[#425d4f] py-6 overflow-hidden">
+        <div className="bg-purple-700 py-6 overflow-hidden">
           <Splide options={splideOptions}>
             {phrasesData.map((phrase, index) => (
               <SplideSlide key={index}>
@@ -237,47 +227,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative bg-[#425d4f] py-16 px-6 overflow-hidden">
-
-          <div className="absolute inset-0 opacity-30">
-
-            <div className="absolute top-8 left-16">
-              <svg width="40" height="60" viewBox="0 0 40 60" fill="none" className="text-emerald-600">
-                <path d="M20 2C15 8 12 18 12 28C12 38 15 48 20 54C25 48 28 38 28 28C28 18 25 8 20 2Z" fill="currentColor" opacity="0.6" />
-                <path d="M20 54L20 58" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-              </svg>
-            </div>
+        <div className="relative bg-purple-700 py-16 px-6 overflow-hidden">
 
 
-            <div className="absolute top-4 right-1/4">
-              <svg width="24" height="32" viewBox="0 0 24 32" fill="none" className="text-emerald-500">
-                <path d="M12 2C8 8 6 14 6 20C6 26 8.5 30 12 30C15.5 30 18 26 18 20C18 14 16 8 12 2Z" fill="currentColor" opacity="0.5" />
-              </svg>
-            </div>
-
-            <div className="absolute top-20 right-1/3">
-              <svg width="20" height="28" viewBox="0 0 20 28" fill="none" className="text-emerald-500">
-                <path d="M10 2C7 7 5 12 5 17C5 22 7 25 10 25C13 25 15 22 15 17C15 12 13 7 10 2Z" fill="currentColor" opacity="0.4" />
-              </svg>
-            </div>
-
-
-            <div className="absolute top-12 right-20">
-              <svg width="60" height="80" viewBox="0 0 60 80" fill="none" className="text-emerald-600">
-                <path d="M30 5C25 12 20 25 20 40C20 55 25 68 30 75" stroke="currentColor" strokeWidth="2" opacity="0.6" />
-                <path d="M25 20C20 15 15 15 12 18C10 20 10 25 15 28C20 25 25 22 25 20Z" fill="currentColor" opacity="0.4" />
-                <path d="M35 35C40 30 45 30 48 33C50 35 50 40 45 43C40 40 35 37 35 35Z" fill="currentColor" opacity="0.4" />
-              </svg>
-            </div>
-
-
-            <div className="absolute bottom-8 right-16">
-              <svg width="50" height="40" viewBox="0 0 50 40" fill="none" className="text-emerald-600">
-                <path d="M5 20C12 15 22 12 32 12C42 12 52 15 47 20C42 25 32 28 22 28C12 28 2 25 5 20Z" fill="currentColor" opacity="0.5" />
-                <path d="M2 20L5 20" stroke="currentColor" strokeWidth="2" opacity="0.7" />
-              </svg>
-            </div>
-          </div>
 
 
           <div className="relative w-full mx-auto px-8">
@@ -285,7 +237,7 @@ export default function HomePage() {
 
               <div className="text-white max-w-xl">
                 <h2 className="text-4xl lg:text-2xl font-bold mb-4 leading-tight">
-                  Crea una cuenta para compras más rápidas  
+                  Crea una cuenta para compras más rápidas
                 </h2>
                 <p className="text-emerald-100 text-lg lg:text-sm opacity-90">
                   Ingresa y recibe promociones u ofertas especiales
@@ -294,9 +246,11 @@ export default function HomePage() {
 
 
               <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-                <button className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 text-sm tracking-wider uppercase hover:bg-white hover:text-black transition-all duration-300 cursor-pointer">
-              Crear cuenta
-            </button>
+                <Link href={"/login"}>
+                  <button className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 text-sm tracking-wider uppercase hover:bg-white hover:text-black transition-all duration-300 cursor-pointer">
+                    Crear cuenta
+                  </button>
+                </Link>
               </div>
             </div>
           </div>

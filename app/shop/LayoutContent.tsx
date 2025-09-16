@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <ProductFiltersProvider>
       <div className="min-h-screen flex flex-col items-center">
         <NavBar />
-        <div className="max-w-7xl pt-20 md:pt-20 px-0">{children}</div>
+        <div className="w-full max-w-7xl pt-20 md:pt-20 px-0">{children}</div>
         <Footer/>
       </div>
     </ProductFiltersProvider>

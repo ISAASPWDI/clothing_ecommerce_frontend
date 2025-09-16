@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton"
 
 type SkeletonCategoryPillsProps = {
@@ -10,7 +11,7 @@ export default function SkeletonCategoryPills({ count = 6 }: SkeletonCategoryPil
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton
           key={i}
-          className="h-8 w-20 rounded-full" // simula el botón pill
+          className="h-8 w-20 rounded-full bg-gray-200 dark:bg-[#3a393b]" // simula el botón pill
         />
       ))}
     </div>

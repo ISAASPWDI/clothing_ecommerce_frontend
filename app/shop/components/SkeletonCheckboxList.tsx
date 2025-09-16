@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton"
 
 type SkeletonCheckboxListProps = {
@@ -9,8 +10,8 @@ export default function SkeletonCheckboxList({ count = 5 }: SkeletonCheckboxList
     <div className="space-y-2">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="flex items-center space-x-2">
-          <Skeleton className="h-4 w-4 rounded" /> {/* cuadradito checkbox */}
-          <Skeleton className="h-4 w-[70px]" />   {/* label simulado */}
+          <Skeleton className="h-4 w-4 rounded bg-gray-200 dark:bg-[#3a393b]" /> {/* cuadradito checkbox */}
+          <Skeleton className="h-4 w-[70px] bg-gray-200 dark:bg-[#3a393b]" />   {/* label simulado */}
         </div>
       ))}
     </div>

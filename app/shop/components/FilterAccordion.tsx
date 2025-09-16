@@ -1,3 +1,4 @@
+// FilterAccordion.tsx - Versión actualizada
 import { useState, useEffect } from "react"
 import { useQuery } from "@apollo/client"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
@@ -52,11 +53,11 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({
     <div className="mb-6">
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value={title.toLowerCase()} className="border-none">
-          <AccordionTrigger className="font-medium text-left hover:no-underline py-3 px-0">
+          <AccordionTrigger className="font-medium text-left hover:no-underline py-3 px-0 text-zinc-900 dark:text-gray-100">
             {title}
             {/* Mostrar contador de items seleccionados */}
             {selectedItems.length > 0 && (
-              <span className="ml-2 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
+              <span className="ml-2 bg-purple-100 dark:bg-purple-700  text-purple-700 dark:text-gray-200 text-xs px-2 py-1 rounded-full">
                 {selectedItems.length}
               </span>
             )}
@@ -71,15 +72,15 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({
 
               {/* Timeout error */}
               {timeoutError && (
-                <div className="text-center bg-red-200 p-5 rounded-md">
-                  <p className="text-red-600 text-sm">Failed to fetch {title.toLowerCase()} (timeout)</p>
+                <div className="text-center bg-red-200 dark:bg-red-900/60 p-5 rounded-md">
+                  <p className="text-red-600 dark:text-red-300 text-sm">Failed to fetch {title.toLowerCase()} (timeout)</p>
                 </div>
               )}
 
               {/* Server error */}
               {!loading && error && (
-                <div className="text-center bg-red-200 p-5 rounded-md">
-                  <p className="text-red-600 text-sm">Failed to fetch {title.toLowerCase()}: {error.message}</p>
+                <div className="text-center bg-red-200 dark:bg-red-900/60 p-5 rounded-md">
+                  <p className="text-red-600 dark:text-red-300 text-sm">Failed to fetch {title.toLowerCase()}: {error.message}</p>
                 </div>
               )}
 
@@ -90,14 +91,16 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({
                     id={`${title}-${item.id}`}
                     checked={selectedItems.includes(item.id)} // 👈 verificar si está seleccionado
                     onCheckedChange={() => handleToggle(item.id)} // 👈 manejar el toggle
-                    className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                    className="dark:data-[state=checked]:bg-purple-600 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600
+                        dark:data-[state=unchecked]:bg-gray-600
+    dark:data-[state=unchecked]:border-gray-700"
                   />
                   <label 
                     htmlFor={`${title}-${item.id}`} 
                     className={`text-sm cursor-pointer ${
                       selectedItems.includes(item.id) 
-                        ? 'text-purple-700 font-medium' 
-                        : 'text-gray-700'
+                        ? 'text-purple-700 dark:text-purple-600 font-medium' 
+                        : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {item.label}
@@ -108,7 +111,7 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({
               {/* Mostrar mensaje si no hay items */}
               {!loading && !error && !timeoutError && items.length === 0 && (
                 <div className="text-center py-4">
-                  <p className="text-gray-500 text-sm">No hay {title.toLowerCase()} disponibles</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">No hay {title.toLowerCase()} disponibles</p>
                 </div>
               )}
             </div>

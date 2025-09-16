@@ -153,7 +153,6 @@ export default function Profile({ session }: SessionOptions) {
 
 
 
-    // Initialize form data from session when available
     useEffect(() => {
         if (session?.user) {
             const initial = {
