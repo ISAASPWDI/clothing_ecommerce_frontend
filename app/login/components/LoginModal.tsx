@@ -4,6 +4,7 @@ import GoogleButton from '@/app/account/components/GoogleButton';
 import FormStyle from '@/app/components/FormStyle';
 import { useForm } from '@/app/hooks/useForm';
 import LoadingSpinner from '@/app/registration/components/LoadingSpinner';
+import { Product } from '@/types/product';
 import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -11,9 +12,10 @@ import { useEffect, useState } from 'react';
 
 interface LoginModalProps {
   onLoginSuccess?: () => void;
+  product: Product;
 }
 
-export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
+export default function LoginModal({ onLoginSuccess, product }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const { formState, onInputChange } = useForm({
@@ -142,7 +144,7 @@ export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
         </p>
         
         <div className="flex justify-center">
-          <GoogleButton onClick={() => signIn('google', { callbackUrl: '/account' })} />
+          <GoogleButton onClick={() => signIn('google', { callbackUrl: `/products/${product.slug}` })} />
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ export default function NavBar() {
     const pathname = usePathname();
     const router = useRouter()
     const [menuActive, setMenuActive] = useState<boolean>(true);
+
     const handleRouteChange = (): void => {
         localStorage.setItem("previousRoute", pathname);
         router.push("/login");
@@ -36,7 +37,7 @@ export default function NavBar() {
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchTerm.trim()) {
-            
+
             router.push(`/shop?searchTerm=${encodeURIComponent(searchTerm.trim())}`);
         }
     };
@@ -46,6 +47,9 @@ export default function NavBar() {
             router.push(`/shop?searchTerm=${encodeURIComponent(searchTerm.trim())}`);
         }
     };
+
+
+    const totalWishlistItems = useSelector((state: RootState) => state.wishlist.items.length);
 
     return (
         <>
@@ -190,18 +194,30 @@ export default function NavBar() {
                             </form>
                             <li className="w-10 h-10 me-5">
                                 {session && session.user?.image ?
-                                    <Button className="shadow-none bg-white hover:bg-white cursor-pointer w-full h-full p-0">
-                                        {/* Link rodea solo la imagen */}
-                                        <Link href="/account" passHref>
-                                            <Image
-                                                src={session.user.image}
-                                                alt="user-image"
-                                                width={40}
-                                                height={40}
-                                                className="rounded-full"
-                                            />
-                                        </Link>
-                                    </Button>
+                                    <div className="relative">
+                                        <div className="absolute z-30">
+                                            <Button className="shadow-none bg-transparent hover:bg-transparent cursor-pointer w-full h-full p-0">
+                                                {/* Link rodea solo la imagen */}
+                                                <Link href="/account?tab=wishlist">
+                                                    <Image
+                                                        src={session.user.image}
+                                                        alt="user-image"
+                                                        width={40}
+                                                        height={40}
+                                                        className="rounded-full"
+                                                    />
+                                                </Link>
+                                            </Button>
+                                        </div>
+                                        {totalWishlistItems > 0 ? (
+                                            <div className="absolute -top-2 -right-2 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                                {totalWishlistItems}
+                                            </div>
+                                        ) : (
+                                            <div className="hidden"></div>
+                                        )}
+                                    </div>
+
                                     :
                                     <Button className={`shadow-none rounded-sm bg-transparent me-10 hover:bg-purple-200/70 dark:hover:bg-purple-700 cursor-pointer ${pathname === '/login' ? "bg-purple-100 dark:bg-purple-700" : ""}`} onClick={handleRouteChange}>
                                         <svg
@@ -226,7 +242,7 @@ export default function NavBar() {
                                 <Link href="/cart">
                                     <div className="relative">
                                         <div className="absolute z-100">
-                                            <Button className="shadow-none rounded-sm bg-transparent hover:bg-transparent dark:hover:bg-purple-700 cursor-pointer">
+                                            <Button className="shadow-none rounded-sm bg-transparent hover:bg-transparent  cursor-pointer">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     width="20"
@@ -245,7 +261,7 @@ export default function NavBar() {
                                                 </svg>
                                             </Button>
                                         </div>
-                                        { totalItems ? <div className="absolute -top-2 -right-12 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        {totalItems ? <div className="absolute -top-2 -right-12 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                                             {totalItems}
                                         </div> : <div className="hidden"></div>}
 
@@ -336,7 +352,7 @@ export default function NavBar() {
                         </li>
                         <li className="w-1/2 min-w-[103px]">
                             <Link href="/cart">
-                                <Button className="shadow-none rounded-sm w-full bg-purple-600 hover:bg-purple-700  cursor-pointer">
+                                <Button className="shadow-none rounded-sm w-full bg-purple-600 hover:bg-purple-700 cursor-pointer">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="20"

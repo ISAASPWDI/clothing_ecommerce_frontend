@@ -36,3 +36,16 @@ interface LoginUserData {
 export interface FindUserByEmailData {
     findUserByEmail: LoginUserData;
 }
+export type Address = {
+    id: number;
+    firstName: string;
+    lastName: string;
+    address: string;
+    optAddress: string;
+    city: string;
+    zipCode: string;
+    phone: string;
+}
+export interface UserOptions {
+    addresses?: Address[]
+}

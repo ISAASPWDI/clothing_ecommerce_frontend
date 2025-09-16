@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image'
 import { Search } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
@@ -13,10 +13,9 @@ import { Button } from '@/components/ui/button';
 import { useProductContext } from '@/contexts/ProductContext';
 
 export default function ShopContent() {
-  // Hook de categorías
-  const { loading: loadingCategories, data: categories, error: errorCategories } = useQuery<GetAllCategoriesResponse>(GET_ALL_CATEGORIES);
+  const { loading: loadingCategories, data: categories, error: errorCategories } =
+    useQuery<GetAllCategoriesResponse>(GET_ALL_CATEGORIES);
 
-  // Usar el custom hook para filtros
   const {
     selectedColors,
     selectedGenres,
@@ -42,28 +41,31 @@ export default function ShopContent() {
     handleLoadMoreProducts
   } = useProductFilters();
 
-
   const { navigateToProduct } = useProductContext();
-
 
   return (
     <div className="container mx-auto px-4 py-8 mb-20">
+      {/* Header */}
       <div className="flex flex-wrap justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900 mb-5">Todos los productos</h1>
-          <p className="text-zinc-600">Navega en nuestra colección de productos minimalistas elegidos para ti 😊</p>
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-gray-100 mb-5">
+            Todos los productos
+          </h1>
+          <p className="text-zinc-600 dark:text-gray-300">
+            Navega en nuestra colección de productos minimalistas elegidos para ti 😊
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Filters */}
         <div className="hidden lg:block lg:col-span-1">
-          <div className="bg-white p-4 rounded-lg">
+          <div className="bg-white dark:bg-[#302f31] p-4 rounded-lg shadow-md dark:shadow-lg">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Filtros</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-gray-100">Filtros</h2>
               <button
                 onClick={clearAllFilters}
-                className="text-purple-600 text-sm cursor-pointer hover:outline-0 outline-0 border-2 border-white hover:border-b-purple-700 transition-all transition-duration duration-500"
+                className="text-purple-600 dark:text-purple-600 text-sm cursor-pointer hover:outline-0 outline-0 border-2 border-transparent hover:border-b-purple-700 transition-all duration-300"
               >
                 Clear All
               </button>
@@ -71,7 +73,7 @@ export default function ShopContent() {
 
             {/* Price Range Filter */}
             <div className="mb-6">
-              <h3 className="font-medium mb-3">Rango de precios</h3>
+              <h3 className="font-medium mb-3 text-zinc-900 dark:text-gray-100">Rango de precios</h3>
               <Slider
                 value={[priceRange]}
                 max={150}
@@ -80,8 +82,8 @@ export default function ShopContent() {
                 className="[&_[data-orientation=horizontal]_span]:bg-purple-600"
               />
               <div className="flex justify-between mt-2">
-                <span className="text-sm text-zinc-600">$0</span>
-                <span className="text-sm text-zinc-600">Hasta ${priceRange}</span>
+                <span className="text-sm text-zinc-600 dark:text-gray-300">$0</span>
+                <span className="text-sm text-zinc-600 dark:text-gray-300">Hasta ${priceRange}</span>
               </div>
             </div>
 
@@ -129,18 +131,18 @@ export default function ShopContent() {
                 placeholder="Buscar productos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                className="w-full pl-4 pr-10 py-2 border border-zinc-200 dark:border-[#3a393b] rounded-lg bg-white dark:bg-[#302f31] text-zinc-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <Search size={18} className="text-zinc-400" />
+                <Search size={18} className="text-zinc-400 dark:text-gray-400" />
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-600">Ordenar por:</span>
+              <span className="text-sm text-zinc-600 dark:text-gray-300">Ordenar por:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'newest' | 'price_asc' | 'price_desc')}
-                className="border border-zinc-200 rounded-lg px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                className="border border-zinc-200 dark:border-[#3a393b] rounded-lg px-2 py-2 bg-white dark:bg-[#302f31] text-zinc-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
               >
                 <option value="newest">Lo más nuevo</option>
                 <option value="price_asc">Precio: Menor a Mayor</option>
@@ -159,8 +161,8 @@ export default function ShopContent() {
                   key={category.id}
                   className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out transform hover:scale-105 ${
                     activeCategory === category.name
-                      ? "bg-purple-500 text-white shadow-lg"
-                      : "bg-purple-100 text-purple-700 hover:bg-purple-200 hover:shadow-md"
+                      ? "bg-purple-600 text-white shadow-lg dark:bg-purple-500"
+                      : "bg-purple-100 text-purple-700 hover:bg-purple-200 hover:shadow-md dark:bg-[#3a393b] dark:text-gray-200 dark:hover:bg-[#4a494b]"
                   }`}
                   onClick={() => setActiveFilter(category.name, Number(category.id))}
                 >
@@ -174,13 +176,13 @@ export default function ShopContent() {
           {loadingProducts && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg overflow-hidden animate-pulse">
-                  <div className="aspect-w-3 aspect-h-2 bg-gray-200 h-48"></div>
+                <div key={i} className="bg-white dark:bg-[#302f31] rounded-lg overflow-hidden animate-pulse shadow-md dark:shadow-lg">
+                  <div className="aspect-w-3 aspect-h-2 bg-gray-200 dark:bg-[#3a393b] h-48"></div>
                   <div className="p-4">
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-10 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-[#3a393b] rounded mb-2"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-[#3a393b] rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-[#3a393b] rounded mb-4"></div>
+                    <div className="h-10 bg-gray-200 dark:bg-[#3a393b] rounded"></div>
                   </div>
                 </div>
               ))}
@@ -188,45 +190,45 @@ export default function ShopContent() {
           )}
 
           {errorProducts && (
-            <div className="text-center bg-red-100 p-8 rounded-lg">
-              <p className="text-red-600">Error al cargar productos: {errorProducts.message}</p>
+            <div className="text-center bg-red-100 dark:bg-red-900/60 p-8 rounded-lg">
+              <p className="text-red-600 dark:text-red-300">Error al cargar productos: {errorProducts.message}</p>
             </div>
           )}
 
           {!loadingProducts && allProducts && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {allProducts.map((product, index) => (
-                              <div
-                                key={product.id}
-                                className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 animate-fade-in-up cursor-pointer"
-                                style={{
-                                  animationDelay: `${index * 100}ms`,
-                                  animationFillMode: 'both'
-                                }}
-                                onClick={() => navigateToProduct(product)}
-                              >
-                                <div className="aspect-w-3 aspect-h-2 bg-gradient-to-br from-purple-50 to-purple-100">
-                                  {product.images && product.images.length > 0 ? (
-                                    <Image
-                                      src={product.images[0].url}
-                                      alt={product.images[0].alt || product.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-48 flex items-center justify-center">
-                                      <span className="text-gray-400">Sin imagen</span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="p-4">
-                                  <div className="text-xs font-semibold text-purple-600 mb-1">{product.id}</div>
-                                  <h3 className="text-lg font-medium mb-1 line-clamp-2">{product.name}</h3>
-                                  <div className="text-zinc-700 font-bold mb-2">${product.price.toFixed(2)}</div>
-                                  <p className="text-sm text-zinc-600 mb-4 line-clamp-3">{product.description}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+              {allProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="bg-white dark:bg-[#302f31] rounded-lg overflow-hidden shadow-sm hover:shadow-lg dark:hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 animate-fade-in-up cursor-pointer"
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                    animationFillMode: 'both'
+                  }}
+                  onClick={() => navigateToProduct(product)}
+                >
+                  <div className="aspect-w-3 aspect-h-2 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-[#3a393b] dark:to-[#302f31]">
+                    {product.images && product.images.length > 0 ? (
+                      <Image
+                        src={product.images[0].url}
+                        alt={product.images[0].alt || product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-48 flex items-center justify-center">
+                        <span className="text-gray-400 dark:text-gray-500">Sin imagen</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1">{product.id}</div>
+                    <h3 className="text-lg font-medium mb-1 line-clamp-2 text-zinc-900 dark:text-gray-100">{product.name}</h3>
+                    <div className="text-zinc-700 dark:text-gray-200 font-bold mb-2">${product.price.toFixed(2)}</div>
+                    <p className="text-sm text-zinc-600 dark:text-gray-300 mb-4 line-clamp-3">{product.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* Load More Button */}
@@ -235,7 +237,7 @@ export default function ShopContent() {
               <Button
                 onClick={handleLoadMoreProducts}
                 disabled={loadingProducts}
-                className="w-40 p-6 bg-purple-600 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-12 hover:shadow-lg transition hover:scale-95"
+                className="w-40 p-6 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-12 hover:shadow-lg transition hover:scale-95"
               >
                 <p className="text-lg">
                   {loadingProducts ? 'Cargando...' : 'Cargar más'}
@@ -246,8 +248,10 @@ export default function ShopContent() {
 
           {/* No products message */}
           {!loadingProducts && allProducts.length === 0 && (
-            <div className="text-center bg-gray-100 p-8 rounded-lg">
-              <p className="text-gray-600">No se encontraron productos con los filtros seleccionados.</p>
+            <div className="text-center bg-gray-100 dark:bg-[#3a393b] p-8 rounded-lg">
+              <p className="text-gray-600 dark:text-gray-300">
+                No se encontraron productos con los filtros seleccionados.
+              </p>
             </div>
           )}
         </div>

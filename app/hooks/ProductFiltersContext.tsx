@@ -100,7 +100,7 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
     if (searchTerm.trim()) {
       params.set('searchTerm', searchTerm);
     }
-    
+
     // Solo actualizar page si no estamos en proceso de "load more"
     if (!skipPageUpdate && currentPage > 1) {
       params.set('page', currentPage.toString());
@@ -117,7 +117,14 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
     }
   };
 
-
+  useEffect(() => {
+    // Si no estamos en /shop, limpiar filtros y búsqueda
+    if (!pathname.startsWith('/shop')) {
+      setSearchTerm('');
+      clearAllFilters();
+    }
+  }, [pathname]);
+  
   useEffect(() => {
     if (!pathname || !pathname.startsWith('/shop') || !categoriesData?.getAllCategories) {
       if (!pathname || !pathname.startsWith('/shop')) {
@@ -129,13 +136,13 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
     const { slugToCategory } = createCategoryMappings();
     const page = searchParams.get('page');
     const search = searchParams.get('searchTerm');
-    
+
 
     const pathSegments = pathname.split('/');
     if (pathSegments.length >= 3 && pathSegments[1] === 'shop' && pathSegments[2]) {
       const categorySlug = pathSegments[2];
       const categoryInfo = slugToCategory[categorySlug];
-      
+
       if (categoryInfo) {
         setActiveCategory(categoryInfo.name);
         setActiveCategoryId(categoryInfo.id);
@@ -211,32 +218,32 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
   const setActiveFilter = (categoryName: string, categoryId: number): void => {
     const { categoryToSlugMap } = createCategoryMappings();
     const currentCategorySlug = categoryToSlugMap[categoryName];
-    
+
     if (pathname === '/shop' && currentCategorySlug) {
       const params = new URLSearchParams();
       if (searchTerm.trim()) {
         params.set('searchTerm', searchTerm);
       }
-      
+
       const queryString = params.toString();
       const newURL = queryString ? `/shop/${currentCategorySlug}?${queryString}` : `/shop/${currentCategorySlug}`;
-      
+
       router.push(newURL);
       return;
     }
-    
+
     if (pathname.startsWith('/shop/') && currentCategorySlug) {
       const currentCategoryFromURL = pathname.split('/')[2];
-      
+
       if (currentCategoryFromURL !== currentCategorySlug) {
         const params = new URLSearchParams();
         if (searchTerm.trim()) {
           params.set('searchTerm', searchTerm);
         }
-        
+
         const queryString = params.toString();
         const newURL = queryString ? `/shop/${currentCategorySlug}?${queryString}` : `/shop/${currentCategorySlug}`;
-        
+
         router.push(newURL);
         return;
       }
@@ -320,7 +327,7 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
       setAllProducts([]);
       setCurrentPage(1);
       setHasMore(true);
-      
+
       fetchProducts({
         variables: {
           filterData,
@@ -342,11 +349,11 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
     }
 
     console.log('Iniciando load more, página actual:', currentPage);
-    
+
     try {
 
       setIsLoadingMore(true);
-      
+
       const nextPage = currentPage + 1;
       const filterData = buildFilterData();
 
@@ -364,7 +371,7 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
 
       if (result.data?.findProductsByRelation) {
         const { products: newProducts, isProducts } = result.data.findProductsByRelation;
-        
+
         console.log('Nuevos productos recibidos:', newProducts.length);
 
         if (newProducts.length > 0) {
@@ -378,7 +385,7 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
             return result;
           });
 
-          
+
           setCurrentPage(nextPage);
         }
 
@@ -403,10 +410,10 @@ export const ProductFiltersProvider: React.FC<{ children: React.ReactNode }> = (
 
     if (shouldFetchProducts && currentPage === 1 && !isLoadingMore) {
       console.log('Cargando productos iniciales...');
-      
+
       setAllProducts([]);
       setHasMore(true);
-      
+
       fetchProducts({
         variables: {
           filterData,

@@ -4,18 +4,19 @@ import storage from 'redux-persist/lib/storage' // localStorage
 import { combineReducers } from '@reduxjs/toolkit'
 import { counterSlice } from './slices/counter/counterSlice'
 import cartReducer from './slices/cart/cartSlice'
-
+import wishListReducer from './slices/wishlist/wishList'
 // Configuración de persistencia
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['cart'] // Solo persiste el slice del carrito
+  whitelist: ['cart', 'wishlist'] // Solo persiste el slice del carrito
 }
 
 // Combinar reducers
 const rootReducer = combineReducers({
   cart: cartReducer,
   counter: counterSlice.reducer,
+  wishlist: wishListReducer,
 })
 
 // Aplicar persistencia al reducer

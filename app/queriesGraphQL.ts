@@ -62,6 +62,34 @@ export const FIND_USER_BY_EMAIL = gql`
     }
   }
 `;
+export const GET_ADRESSES = gql`
+  query{
+    getAdresses {
+      id
+      firstName
+      lastName
+      address
+      optAddress
+      city
+      zipCode
+      phone
+    }
+  }
+`;
+export const ADD_ADDRESS = gql`
+  mutation AddAddress($input: AddressInput!) {
+    addAddress(input: $input) {
+      id
+      firstName
+      lastName
+      address
+      optAddress
+      city
+      zipCode
+      phone
+    }
+  }
+`;
 
 //PRODUCTOS
 export const GET_ALL_CATEGORIES = gql`
