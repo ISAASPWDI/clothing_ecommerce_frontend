@@ -38,14 +38,37 @@ export interface FindUserByEmailData {
 }
 export type Address = {
     id: number;
+    userId: string;
     firstName: string;
     lastName: string;
     address: string;
-    optAddress: string;
+    optAddress?: string | null;
     city: string;
     zipCode: string;
     phone: string;
 }
-export interface UserOptions {
-    addresses?: Address[]
+export interface GetAddressesResponse {
+  getAddresses: Address[];
+}
+
+export interface AddAddressResponse {
+  addAddress: Address;
+}
+export interface AddAddressVariables {
+  input: Omit<Address, "id">;
+}
+
+export interface UpdateAddressResponse {
+  updateAddress: Address;
+}
+export interface UpdateAddressVariables {
+  id: number;
+  input: Omit<Address, "id">;
+}
+
+export interface DeleteAddressResponse {
+  deleteAddress: boolean;
+}
+export interface DeleteAddressVariables {
+  id: number;
 }

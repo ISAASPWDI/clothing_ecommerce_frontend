@@ -62,9 +62,9 @@ export const FIND_USER_BY_EMAIL = gql`
     }
   }
 `;
-export const GET_ADRESSES = gql`
-  query{
-    getAdresses {
+export const GET_ADDRESSES = gql`
+  query GetAddresses {
+    getAddresses {
       id
       firstName
       lastName
@@ -90,7 +90,25 @@ export const ADD_ADDRESS = gql`
     }
   }
 `;
-
+export const UPDATE_ADDRESS = gql`
+  mutation UpdateAddress($id: Int!, $input: UpdateAddressInput!) {
+    updateAddress(id: $id, input: $input) {
+      id
+      firstName
+      lastName
+      address
+      optAddress
+      city
+      zipCode
+      phone
+    }
+  }
+`;
+export const DELETE_ADDRESS = gql`
+  mutation DeleteAddress($id: Int!) {
+    deleteAddress(id: $id)
+  }
+`;
 //PRODUCTOS
 export const GET_ALL_CATEGORIES = gql`
   query{

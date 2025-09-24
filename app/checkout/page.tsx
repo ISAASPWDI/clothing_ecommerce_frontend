@@ -509,9 +509,10 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         {item.quantity > 1 && (
-                          <span className="absolute -top-2 -right-2 bg-purple-600 dark:bg-purple-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-medium shadow-lg animate-bounce">
+                          <span className="absolute -top-2 -right-2 bg-purple-600 dark:bg-purple-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-medium shadow-lg animate-bounce-small">
                             {item.quantity}
                           </span>
+
                         )}
                       </div>
 

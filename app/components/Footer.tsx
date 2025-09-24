@@ -144,12 +144,15 @@ export default function Footer() {
 
                 {/* Payment Methods */}
                 <div className="flex justify-center items-center space-x-4 mt-18 mb-6">
-                    <Image
-                        src={`/mercado-pago-logo.webp`}
-                        width={40}
-                        height={40}
-                        alt="Mercado pago"
-                    />
+                    <div className="relative w-10 h-10">
+                        <Image
+                            src="/mercado-pago-logo.webp"
+                            alt="Mercado Pago"
+                            fill
+                            sizes="40px"
+                            className="object-contain"
+                        />
+                    </div>
                     <div>
                         {/* Visa */}
                         <svg className="w-14 h-auto pr-2 mt-2 space-y-2" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" width="38" height="24" aria-labelledby="pi-visa">
