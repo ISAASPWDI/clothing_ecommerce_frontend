@@ -42,7 +42,7 @@ export default function ShopContent() {
   } = useProductFilters();
 
   const { navigateToProduct } = useProductContext();
-
+  
   return (
     <div className="container mx-auto px-4 py-8 mb-20">
       {/* Header */}
@@ -232,7 +232,7 @@ export default function ShopContent() {
           )}
 
           {/* Load More Button */}
-          {hasMore && (
+          {hasMore || loadingProducts && (
             <div className="flex justify-center items-center">
               <Button
                 onClick={handleLoadMoreProducts}
@@ -240,7 +240,7 @@ export default function ShopContent() {
                 className="w-40 p-6 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-12 hover:shadow-lg transition hover:scale-95"
               >
                 <p className="text-lg">
-                  {loadingProducts ? 'Cargando...' : 'Cargar más'}
+                  {loadingProducts && 'Cargar más'}
                 </p>
               </Button>
             </div>

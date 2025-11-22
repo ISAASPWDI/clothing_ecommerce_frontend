@@ -7,9 +7,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useMutation } from '@apollo/client';// Ajusta la ruta según tu estructura
 import {
   ArrowLeft,
   Info,
@@ -28,10 +28,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { RootState } from '../store/store';
-import { clearCart } from '@/app/store/slices/cart/cartSlice';
 import { useForm } from '../hooks/useForm';
 import FormStyle from '../components/FormStyle';
 import { useRouter } from 'next/navigation'
+import { CREATE_PAYMENT_PREFERENCE } from "../queriesGraphQL";
 
 // Provincias de Argentina
 const PROVINCIAS_ARGENTINA = [
@@ -63,14 +63,17 @@ const PROVINCIAS_ARGENTINA = [
 
 export default function CheckoutPage() {
   const dispatch = useDispatch();
-  const router = useRouter()
+  const router = useRouter();
   const { items, totalItems, totalPrice } = useSelector((state: RootState) => state.cart);
+
+  // Mutation de Apollo
+  const [crearPreferenciaPago, { loading: mercadoPagoLoading, error: mercadoPagoError }] = useMutation(CREATE_PAYMENT_PREFERENCE);
 
   useEffect(() => {
     if (totalItems === 0) {
       router.push('/cart');
     }
-  }, [totalItems]);
+  }, [totalItems, router]);
 
   // Usando el custom hook useForm
   const {
@@ -122,31 +125,135 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleMercadoPagoCheckout = async () => {
-    setIsProcessing(true);
-    setProcessingMethod('mercadopago');
-
-    try {
-      console.log('Procesando pago con MercadoPago...', {
-        items,
-        totalPrice,
-        customerInfo: formState
-      });
-
-      // Simulación de procesamiento
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      dispatch(clearCart());
-
-    } catch (error) {
-      console.error('Error en el checkout:', error);
-    } finally {
-      setIsProcessing(false);
-      setProcessingMethod(null);
+  // Validación del formulario
+  const validateForm = () => {
+    if (!email || !firstName || !lastName || !address || !province || !zipCode || !phone) {
+      alert('Por favor, completa todos los campos obligatorios');
+      return false;
     }
+
+    // Validación básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Por favor, ingresa un email válido');
+      return false;
+    }
+
+    return true;
   };
 
+const handleMercadoPagoCheckout = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
+  setIsProcessing(true);
+  setProcessingMethod('mercadopago');
+
+  try {
+    const mercadoPagoItems = items.map(item => ({
+      id: item.id.toString(),
+      title: item.name,
+      description: `${item.selectedColorName ? `Color: ${item.selectedColorName}` : ''} ${item.selectedSizeName ? `Talle: ${item.selectedSizeName}` : ''}`.trim(),
+      quantity: item.quantity,
+      unit_price: item.price,
+      currency_id: "ARS",
+      category_id: "retail"
+    }));
+
+    const payerInfo = {
+      email: email,
+      name: firstName,
+      surname: lastName,
+      phone: {
+        area_code: phone.substring(0, 3).replace(/\D/g, ''),
+        number: phone.replace(/\D/g, '').substring(3)
+      },
+      address: {
+        street_name: address,
+        street_number: apartment ? parseInt(apartment) : undefined,
+        zip_code: zipCode
+      }
+    };
+
+    // Usar ngrok URL o variable de entorno
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://tu-ngrok-url.ngrok-free.app';
+    
+    const backUrls = {
+      success: `${baseUrl}/checkout/success`,
+      failure: `${baseUrl}/checkout/failure`,
+      pending: `${baseUrl}/checkout/pending`
+    };
+
+    console.log('URLs de retorno:', backUrls);
+    
+    const { data } = await crearPreferenciaPago({
+      variables: {
+        input: {
+          items: mercadoPagoItems,
+          payer: payerInfo,
+          back_urls: backUrls,
+          auto_return: "approved", // ← Asegúrate que esto se envíe
+          external_reference: `ORDER-${Date.now()}`,
+          statement_descriptor: "TU_TIENDA",
+          binary_mode: false,
+          payment_methods: {
+            installments: 12
+          },
+          expires: true,
+          expiration_date_from: new Date().toISOString(),
+          expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        }
+      }
+    });
+
+    console.log('Preferencia creada:', data);
+
+    if (data?.crearPreferenciaPago?.initPoint) {
+      // Guardar información del pedido
+      if (saveInfo) {
+        localStorage.setItem('customerInfo', JSON.stringify({
+          firstName, lastName, email, address, apartment,
+          city, province, zipCode, phone
+        }));
+      }
+
+      const externalRef = `ORDER-${Date.now()}`;
+      localStorage.setItem('pendingOrder', JSON.stringify({
+        items: items,
+        total: totalPrice,
+        customerInfo: { firstName, lastName, email, phone, address },
+        externalReference: externalRef,
+        timestamp: Date.now()
+      }));
+
+      console.log('External reference guardada:', externalRef);
+
+      // Redirigir a MercadoPago
+      const checkoutUrl = data.crearPreferenciaPago.sandboxInitPoint || 
+                          data.crearPreferenciaPago.initPoint;
+      
+      console.log('Redirigiendo a:', checkoutUrl);
+      window.location.href = checkoutUrl;
+    } else {
+      throw new Error('No se pudo obtener el link de pago');
+    }
+
+  } catch (error) {
+    console.error('Error al crear preferencia de MercadoPago:', error);
+    alert('Hubo un error al procesar el pago. Por favor, intenta nuevamente.');
+  } finally {
+    setIsProcessing(false);
+    setProcessingMethod(null);
+  }
+};
+
   const handleGooglePayCheckout = async () => {
+    // Validar formulario
+    if (!validateForm()) {
+      return;
+    }
+
     setIsProcessing(true);
     setProcessingMethod('googlepay');
 
@@ -157,10 +264,12 @@ export default function CheckoutPage() {
         customerInfo: formState
       });
 
-      // Simulación de procesamiento
+      // Aquí implementarías la integración con Google Pay
+      // Por ahora es una simulación
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      dispatch(clearCart());
+      // dispatch(clearCart());
+      alert('Google Pay aún no está implementado');
 
     } catch (error) {
       console.error('Error en el checkout:', error);
@@ -169,6 +278,14 @@ export default function CheckoutPage() {
       setProcessingMethod(null);
     }
   };
+
+  // Mostrar error de MercadoPago si existe
+  useEffect(() => {
+    if (mercadoPagoError) {
+      console.error('Error de MercadoPago:', mercadoPagoError);
+      alert('Error al conectar con MercadoPago. Por favor, intenta nuevamente.');
+    }
+  }, [mercadoPagoError]);
 
   return (
     <TooltipProvider>
@@ -409,10 +526,10 @@ export default function CheckoutPage() {
                       {/* MercadoPago */}
                       <button
                         onClick={handleMercadoPagoCheckout}
-                        disabled={isProcessing}
+                        disabled={isProcessing || mercadoPagoLoading}
                         className="group relative w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                       >
-                        {isProcessing && processingMethod === 'mercadopago' ? (
+                        {isProcessing && processingMethod === 'mercadopago' || mercadoPagoLoading ? (
                           <div className="flex items-center space-x-2">
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             <span>Procesando...</span>

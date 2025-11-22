@@ -262,3 +262,20 @@ export const GET_RELATED_PRODUCTS = gql`
     }
   }
 `;
+
+//Payments
+export const CREATE_PAYMENT_PREFERENCE = gql`
+  mutation CrearPreferenciaPago($input: PreferenciaInput!) {
+    crearPreferenciaPago(input: $input) {
+      id
+      initPoint
+      sandboxInitPoint
+      autoReturn
+      backUrls {
+        success
+        failure
+        pending
+      }
+    }
+  }
+`;
