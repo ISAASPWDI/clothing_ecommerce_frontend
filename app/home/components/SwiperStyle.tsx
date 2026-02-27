@@ -1,13 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image'
-// Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
-// Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-// Import required modules
 import { Navigation } from 'swiper/modules';
 import { StatusStateOptions, useSwiper } from '../../hooks/useSwiper';
 import { StatusState } from '../../components/StatusState';
@@ -37,6 +34,7 @@ interface SwiperConfigOptions {
 export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfigOptions) {
   const { navigateToProduct } = useProductContext();
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
+  const [tabsSwiperInstance, setTabsSwiperInstance] = useState<SwiperType | null>(null);
   const prevRef = useRef<HTMLButtonElement | null>(null);
   const nextRef = useRef<HTMLButtonElement | null>(null);
 
@@ -105,7 +103,6 @@ export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfig
 
   return (
     <div className="max-w-[1920px] mx-auto px-8 py-8">
-      {/* Título y navegación */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-purple-700 dark:text-purple-700">{title}</h1>
         <div className="flex space-x-2">
@@ -130,25 +127,30 @@ export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfig
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-[#3a393b] mb-6">
-        <nav className="flex space-x-8">
+        <Swiper
+          spaceBetween={16}
+          slidesPerView="auto"
+          freeMode={true}
+          onSwiper={setTabsSwiperInstance}
+          className="tabs-swiper"
+        >
           {itemsList?.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleItemClick(item.id)}
-              className={`pb-2 px-1 ${getActiveItemId(item)
-                ? "border-b-2 border-purple-700 font-medium text-purple-700 dark:text-purple-600"
-                : "text-gray-500 dark:text-gray-300"
-                }`}
-            >
-              <span>{getItemText(item)}</span>
-            </button>
+            <SwiperSlide key={item.id} style={{ width: 'auto' }}>
+              <button
+                onClick={() => handleItemClick(item.id)}
+                className={`pb-2 px-1 whitespace-nowrap ${getActiveItemId(item)
+                  ? "border-b-2 border-purple-700 font-medium text-purple-700 dark:text-purple-600"
+                  : "text-gray-500 dark:text-gray-300"
+                  }`}
+              >
+                <span>{getItemText(item)}</span>
+              </button>
+            </SwiperSlide>
           ))}
-        </nav>
+        </Swiper>
       </div>
 
-      {/* Contenedor de productos */}
       <div className="min-h-[600px] relative">
         {(() => {
           const currentState = actualSwiperData.states.find((s: StatusStateOptions) => s.loading || s.error);
@@ -234,6 +236,21 @@ export default function SwiperStyle({ title, dataTitle, dataBody }: SwiperConfig
             )}
         </div>
       </div>
+
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .tabs-swiper {
+          cursor: grab;
+        }
+        .tabs-swiper:active {
+          cursor: grabbing;
+        }
+        .tabs-swiper .swiper-slide {
+          width: auto !important;
+        }
+      `}</style>
     </div>
   );
 }

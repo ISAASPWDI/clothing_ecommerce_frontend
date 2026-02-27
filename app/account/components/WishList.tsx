@@ -6,7 +6,17 @@ import { addToCart, CartItem } from '@/app/store/slices/cart/cartSlice';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 interface RootState {
   wishlist: {
     items: WishListItem[];
@@ -136,7 +146,7 @@ export function WishlistContent() {
                 <button
                   onClick={() => {
                     handleAddToCart(item),
-                    handleRemoveFromWishlist(item.id, item.selectedColor, item.selectedSize);
+                      handleRemoveFromWishlist(item.id, item.selectedColor, item.selectedSize);
                   }}
                   className="bg-purple-600 dark:bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 dark:hover:bg-purple-700 transition-colors text-sm font-medium"
                 >
@@ -149,7 +159,7 @@ export function WishlistContent() {
                 </button>
                 <Link
                   href={`/products/${item.slug}`}
-                  className="bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-400 px-4 py-2 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors text-sm font-medium text-center"
+                  className="bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors text-sm font-medium text-center"
                 >
                   Ver producto
                 </Link>
@@ -162,18 +172,45 @@ export function WishlistContent() {
       {/* Botón para limpiar toda la lista */}
       {wishlistItems.length > 0 && (
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => {
-              if (confirm('¿Estás seguro de que quieres eliminar todos los productos de tu lista de deseos?')) {
-                wishlistItems.forEach(item => {
-                  handleRemoveFromWishlist(item.id, item.selectedColor, item.selectedSize);
-                });
-              }
-            }}
-            className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors"
-          >
-            Limpiar lista de deseos
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition-colors"
+              >
+                Limpiar lista de deseos
+              </button>
+            </AlertDialogTrigger>
+
+            {/* Estilos Duales: Blanco (Light) | #302f31 (Dark) */}
+            <AlertDialogContent className="bg-white dark:bg-[#302f31] dark:border-[#302f31]">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-gray-900 dark:text-white">
+                  ¿Estás seguro de que quieres limpiar la lista?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-500 dark:text-gray-300">
+                  Esta acción eliminará todos los productos de tu lista de deseos permanentemente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-white text-gray-900 border-gray-200 hover:bg-gray-100 dark:bg-transparent dark:text-white dark:border-gray-500 dark:hover:bg-white/10 dark:hover:text-white">
+                  Cancelar
+                </AlertDialogCancel>
+
+                {/* Aquí ejecutamos el bucle al confirmar */}
+                <AlertDialogAction
+                  onClick={() => {
+                    wishlistItems.forEach(item => {
+                      handleRemoveFromWishlist(item.id, item.selectedColor, item.selectedSize);
+                    });
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white border-0"
+                >
+                  Sí, limpiar todo
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
     </div>

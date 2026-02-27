@@ -37,7 +37,6 @@ export default function NavBar() {
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchTerm.trim()) {
-
             router.push(`/shop?searchTerm=${encodeURIComponent(searchTerm.trim())}`);
         }
     };
@@ -48,7 +47,6 @@ export default function NavBar() {
         }
     };
 
-
     const totalWishlistItems = useSelector((state: RootState) => state.wishlist.items.length);
 
     return (
@@ -56,7 +54,6 @@ export default function NavBar() {
             <header className="relative">
                 <div className="animate__animated animate__fadeIn animate__faster flex items-center justify-between px-8 lg:px-16 fixed top-0 w-full mx-auto h-20 bg-white/80 dark:bg-[#302f31]/80 backdrop-blur-md z-50 -translate-x-1/2">
 
-                    {/* Logo: Minimalista */}
                     <div>
                         <Link href="/home">
                             <Button className="px-0 lg:px-5 shadow-none rounded-sm bg-transparent hover:bg-transparent cursor-pointer">
@@ -64,7 +61,7 @@ export default function NavBar() {
                             </Button>
                         </Link>
                     </div>
-                    {/* Menú hamburguesa disponible en móviles */}
+
                     <div className="flex lg:hidden">
                         <button
                             onClick={handleMenu}
@@ -72,7 +69,6 @@ export default function NavBar() {
                             type="button"
                         >
                             {menuActive ? (
-                                // SVG del menú activo
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="24"
@@ -89,7 +85,6 @@ export default function NavBar() {
                                     <line x1="3" y1="18" x2="21" y2="18" />
                                 </svg>
                             ) : (
-                                // SVG del menú desactivado
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="24"
@@ -107,7 +102,7 @@ export default function NavBar() {
                             )}
                         </button>
                     </div>
-                    {/* Navegación: Inicio, Tienda y Acerca de (visibles en md hacia arriba) */}
+
                     <nav className="hidden lg:flex">
                         <ul className="flex items-center">
                             <li className={`relative group font-medium me-10 ${pathname === "/home" ? "text-purple-700" : ""}`}>
@@ -122,17 +117,16 @@ export default function NavBar() {
                                     Tienda
                                     <span className="underline-animation"></span>
                                 </Link>
-
                             </li>
+
                             <li className={`relative group font-medium me-10 ${pathname === "/about" ? "text-purple-700" : ""}`}>
                                 <Link href="/about">
                                     Nosotros
                                     <span className="underline-animation"></span>
                                 </Link>
-
                             </li>
-
                         </ul>
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -156,13 +150,13 @@ export default function NavBar() {
                                     Light
                                 </DropdownMenuItem>
 
-
                                 <DropdownMenuItem
                                     onClick={() => setTheme("dark")}
                                     className="cursor-pointer px-4 py-2 focus:bg-purple-200/70 dark:hover:bg-purple-700 transition-colors"
                                 >
                                     Dark
                                 </DropdownMenuItem>
+
                                 <DropdownMenuItem
                                     onClick={() => setTheme("system")}
                                     className="cursor-pointer px-4 py-2 focus:bg-purple-200/70 dark:hover:bg-purple-700 transition-colors"
@@ -171,9 +165,8 @@ export default function NavBar() {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-
                     </nav>
-                    {/* Navegación: Account y Cart (visibles en md hacia arriba) */}
+
                     <nav className="hidden lg:flex">
                         <ul className="flex">
                             <form onSubmit={handleSearchSubmit} className="relative flex-grow ms-3 me-0 md:me-5">
@@ -187,17 +180,17 @@ export default function NavBar() {
                                 <button
                                     type="button"
                                     onClick={handleIconClick}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3 hover:bg-gray-50 rounded-r-lg transition-colors cursor-pointer"
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 hover:bg-gray-50 dark:hover:bg-transparent rounded-r-lg transition-colors cursor-pointer"
                                 >
                                     <Search size={18} className="text-zinc-400" />
                                 </button>
                             </form>
+
                             <li className="w-10 h-10 me-5">
                                 {session && session.user?.image ?
                                     <div className="relative">
                                         <div className="absolute z-30">
                                             <Button className="shadow-none bg-transparent hover:bg-transparent cursor-pointer w-full h-full p-0">
-                                                {/* Link rodea solo la imagen */}
                                                 <Link href="/account?tab=wishlist">
                                                     <Image
                                                         src={session.user.image}
@@ -209,15 +202,12 @@ export default function NavBar() {
                                                 </Link>
                                             </Button>
                                         </div>
-                                        {totalWishlistItems > 0 ? (
+                                        {totalWishlistItems > 0 && (
                                             <div className="absolute -top-2 -right-2 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                                                 {totalWishlistItems}
                                             </div>
-                                        ) : (
-                                            <div className="hidden"></div>
                                         )}
                                     </div>
-
                                     :
                                     <Button className={`shadow-none rounded-sm bg-transparent me-10 hover:bg-purple-200/70 dark:hover:bg-purple-700 cursor-pointer ${pathname === '/login' ? "bg-purple-100 dark:bg-purple-700" : ""}`} onClick={handleRouteChange}>
                                         <svg
@@ -238,6 +228,7 @@ export default function NavBar() {
                                     </Button>
                                 }
                             </li>
+
                             <li>
                                 <Link href="/cart">
                                     <div className="relative">
@@ -261,19 +252,19 @@ export default function NavBar() {
                                                 </svg>
                                             </Button>
                                         </div>
-                                        {totalItems ? <div className="absolute -top-2 -right-12 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                            {totalItems}
-                                        </div> : <div className="hidden"></div>}
-
+                                        {totalItems > 0 && (
+                                            <div className="absolute -top-2 -right-12 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                                {totalItems}
+                                            </div>
+                                        )}
                                     </div>
-
                                 </Link>
                             </li>
                         </ul>
                     </nav>
                 </div>
             </header>
-            {/* Nuevo div agregado después del contenedor fixed para móviles */}
+
             <div
                 className={`lg:hidden fixed top-16 left-0 w-full bg-white dark:bg-[#302f31] z-40 transition-transform duration-500 ${menuActive ? "-translate-y-full scale-70" : "translate-y-0"
                     }`}>
@@ -287,6 +278,7 @@ export default function NavBar() {
                                 Inicio
                             </Link>
                         </li>
+
                         <li className="rounded-sm font-medium mt-4 hover:bg-purple-100 dark:hover:bg-purple-700">
                             <Link
                                 href="/shop"
@@ -295,6 +287,7 @@ export default function NavBar() {
                                 Tienda
                             </Link>
                         </li>
+
                         <li className="rounded-sm font-medium mt-4 hover:bg-purple-100 dark:hover:bg-purple-700">
                             <Link
                                 href="/about"
@@ -303,8 +296,8 @@ export default function NavBar() {
                                 Nosotros
                             </Link>
                         </li>
-                        <li className="w-full p-4 min-w-[133px]">
 
+                        <li className="w-full p-4 min-w-[133px]">
                             <form onSubmit={handleSearchSubmit} className="relative flex-grow">
                                 <input
                                     type="text"
@@ -321,38 +314,38 @@ export default function NavBar() {
                                     <Search size={18} className="text-zinc-400" />
                                 </button>
                             </form>
-
                         </li>
                     </ul>
                 </nav>
+
                 <nav className="pt-2 pb-8 px-8">
                     <ul className="flex justify-between">
-
                         <li className="w-1/2 me-5 min-w-[133px]">
-
-                            <Button className={`flex justify-center shadow-none rounded-sm w-full border border-gray-200 bg-white hover:bg-purple-100 cursor-pointer ${pathname === "/login" ? "bg-purple-100" : ""}`} onClick={handleRouteChange}>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lucide lucide-user text-black"
+                            {session && session.user?.image ? (
+                                <Link href="/account?tab=wishlist">
+                                    <div className="relative">
+                                        <Button className="flex justify-center shadow-none rounded-sm w-full border border-gray-200 bg-white hover:bg-purple-100 dark:bg-[#302f31] dark:border-gray-600 dark:hover:bg-purple-700 cursor-pointer">
+                                            <Image
+                                                src={session.user.image}
+                                                alt="user-image"
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                            />
+                                            <p className="font-medium text-black dark:text-white ml-2">Mi cuenta</p>
+                                        </Button>
+                                        {totalWishlistItems > 0 && (
+                                            <div className="absolute -top-2 -right-2 z-50 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                                {totalWishlistItems}
+                                            </div>
+                                        )}
+                                    </div>
+                                </Link>
+                            ) : (
+                                <Button 
+                                    className={`flex justify-center shadow-none rounded-sm w-full border border-gray-200 bg-white hover:bg-purple-100 dark:bg-[#302f31] dark:border-gray-600 dark:hover:bg-purple-700 cursor-pointer ${pathname === "/login" ? "bg-purple-100 dark:bg-purple-700" : ""}`} 
+                                    onClick={handleRouteChange}
                                 >
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                <p className="font-medium text-black">Mi cuenta</p>
-                            </Button>
-
-                        </li>
-                        <li className="w-1/2 min-w-[103px]">
-                            <Link href="/cart">
-                                <Button className="shadow-none rounded-sm w-full bg-purple-600 hover:bg-purple-700 cursor-pointer">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="20"
@@ -363,20 +356,49 @@ export default function NavBar() {
                                         strokeWidth="2"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        className="lucide lucide-shopping-cart text-white"
+                                        className="lucide lucide-user text-black dark:text-white"
                                     >
-                                        <circle cx="8" cy="21" r="1"></circle>
-                                        <circle cx="19" cy="21" r="1"></circle>
-                                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
-                                    <p className="font-medium text-white">Carrito (0)</p>
+                                    <p className="font-medium text-black dark:text-white">Mi cuenta</p>
                                 </Button>
+                            )}
+                        </li>
+
+                        <li className="w-1/2 min-w-[103px]">
+                            <Link href="/cart">
+                                <div className="relative">
+                                    <Button className="shadow-none rounded-sm w-full bg-purple-600 hover:bg-purple-700 cursor-pointer">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="lucide lucide-shopping-cart text-white"
+                                        >
+                                            <circle cx="8" cy="21" r="1"></circle>
+                                            <circle cx="19" cy="21" r="1"></circle>
+                                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                                        </svg>
+                                        <p className="font-medium text-white">Carrito ({totalItems})</p>
+                                    </Button>
+                                    {totalItems > 0 && (
+                                        <div className="absolute -top-2 -right-2 z-50 bg-white text-purple-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-purple-600">
+                                            {totalItems}
+                                        </div>
+                                    )}
+                                </div>
                             </Link>
                         </li>
                     </ul>
                 </nav>
             </div>
-
         </>
     );
-};
+}

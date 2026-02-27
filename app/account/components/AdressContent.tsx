@@ -27,6 +27,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import FormStyle from '@/app/components/FormStyle';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 // Tipo para el formulario que sea compatible con useForm
 type AddAddressFormInput = {
@@ -44,7 +45,7 @@ type AddAddressInput = Omit<Address, "id">;
 
 export function AddressesContent() {
     const { data: session, status } = useSession();
-    
+
     // Corregir el tipado de la query
     const { loading: loadingAddresses, data, error: errorAddresses } = useQuery<GetAddressesResponse>(GET_ADDRESSES);
     const addresses = data?.getAddresses || [];
@@ -126,7 +127,7 @@ export function AddressesContent() {
                 phone: formState.phone,
             };
             console.log(editingAddress);
-            
+
             if (editingAddress) {
                 // Actualizar dirección existente (sin incluir userId en el input de actualización)
                 const updateInput = {
@@ -141,9 +142,9 @@ export function AddressesContent() {
                 };
 
                 await updateAddress({
-                    variables: { 
-                        id: editingAddress.id, 
-                        input: updateInput 
+                    variables: {
+                        id: editingAddress.id,
+                        input: updateInput
                     }
                 });
                 console.log("Dirección actualizada:", editingAddress.id);
@@ -193,17 +194,14 @@ export function AddressesContent() {
         }
         setIsDialogOpen(true);
     };
-
     const handleDeleteAddress = async (addressId: number) => {
-        if (confirm('¿Estás seguro de que quieres eliminar esta dirección?')) {
-            try {
-                await deleteAddress({
-                    variables: { id: addressId }
-                });
-                console.log('Dirección eliminada:', addressId);
-            } catch (err) {
-                console.error("Error al eliminar dirección:", err);
-            }
+        try {
+            await deleteAddress({
+                variables: { id: addressId }
+            });
+            console.log('Dirección eliminada:', addressId);
+        } catch (err) {
+            console.error("Error al eliminar dirección:", err);
         }
     };
 
@@ -280,7 +278,7 @@ export function AddressesContent() {
                 <h2 className="font-bold text-xl dark:text-white">Direcciones de Envío</h2>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <button 
+                        <button
                             className="inline-flex items-center px-4 py-2 bg-purple-600 dark:bg-purple-600 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-700 transition-colors text-sm font-medium"
                             onClick={handleOpenNewAddressDialog}
                         >
@@ -289,7 +287,7 @@ export function AddressesContent() {
                         </button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md dark:bg-[#302f31] max-h-[80vh] overflow-y-auto"
-                    aria-describedby={undefined}>
+                        aria-describedby={undefined}>
                         <DialogHeader>
                             <DialogTitle>
                                 {editingAddress ? 'Editar Dirección' : 'Agregar Nueva Dirección'}
@@ -368,7 +366,7 @@ export function AddressesContent() {
                                 placeholder="+51 987 654 321"
                                 autoComplete="tel"
                             />
-                            
+
                             {/* Mensaje de error */}
                             {isFieldNull && (
                                 <div className="flex justify-center items-center bg-white/90 dark:bg-[#302f31]/95 mb-4">
@@ -379,7 +377,7 @@ export function AddressesContent() {
                                     </div>
                                 </div>
                             )}
-                            
+
                             <div className="flex justify-end gap-3 pt-6">
                                 <button
                                     type="button"
@@ -397,7 +395,7 @@ export function AddressesContent() {
                                     {isLoading && (
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                     )}
-                                    {isLoading 
+                                    {isLoading
                                         ? (editingAddress ? 'Actualizando...' : 'Guardando...')
                                         : (editingAddress ? 'Actualizar Dirección' : 'Guardar Dirección')
                                     }
@@ -434,17 +432,45 @@ export function AddressesContent() {
                                         >
                                             <Edit className="w-4 h-4" />
                                         </button>
-                                        <button
-                                            onClick={() => handleDeleteAddress(address.id)}
-                                            disabled={isLoading}
-                                            className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
-                                        >
-                                            {loadingDelete ? (
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
-                                            )}
-                                        </button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <button
+                                                    disabled={isLoading || loadingDelete}
+                                                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                                >
+                                                    {loadingDelete ? (
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                                                    ) : (
+                                                        <Trash2 className="w-4 h-4" />
+                                                    )}
+                                                </button>
+                                            </AlertDialogTrigger>
+
+                                            {/* Lógica Dual */}
+                                            <AlertDialogContent className="bg-white dark:bg-[#302f31] dark:border-[#302f31]">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle className="text-gray-900 dark:text-white">
+                                                        ¿Eliminar dirección?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-gray-500 dark:text-gray-300">
+                                                        Esta acción eliminará permanentemente esta dirección de tu lista de envíos.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="bg-white text-gray-900 border-gray-200 hover:bg-gray-100 dark:bg-transparent dark:text-white dark:border-gray-500 dark:hover:bg-white/10 dark:hover:text-white">
+                                                        Cancelar
+                                                    </AlertDialogCancel>
+
+                                                    <AlertDialogAction
+                                                        onClick={() => handleDeleteAddress(address.id)}
+                                                        className="bg-red-600 hover:bg-red-700 text-white border-0"
+                                                    >
+                                                        Eliminar
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </div>
                                 </div>
                             </div>

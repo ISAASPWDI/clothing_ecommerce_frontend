@@ -279,3 +279,90 @@ export const CREATE_PAYMENT_PREFERENCE = gql`
     }
   }
 `;
+export const GET_ALL_ORDERS = gql`
+  query GetAllOrders($page: Int, $limit: Int) {
+    allOrders(page: $page, limit: $limit) {
+      orders {
+        id
+        externalReference
+        status
+        total
+        createdAt
+        orderItems {
+          name
+          quantity
+          price
+        }
+      }
+      pagination {
+        currentPage
+        totalPages
+        totalOrders
+        hasNextPage
+        hasPrevPage
+      }
+    }
+  }
+`;
+export const GET_MY_ORDERS_PAGINATED = gql`
+  query GetMyOrdersPaginated($page: Int, $limit: Int) {
+    myOrdersPaginated(page: $page, limit: $limit) {
+      orders {
+        id
+        externalReference
+        status
+        total
+        createdAt
+      }
+      pagination {
+        currentPage
+        totalPages
+        totalOrders
+        hasNextPage
+        hasPrevPage
+      }
+    }
+  }
+`;
+export const GET_MY_ORDER_DETAIL = gql`
+  query GetMyOrderDetail($externalReference: String!) {
+    myOrderDetail(externalReference: $externalReference) {
+      id
+      externalReference
+      status
+      total
+      subtotal
+      itemsCount
+      createdAt
+      paidAt
+      
+      orderItems {
+        id
+        name
+        quantity
+        price
+        selectedColor
+        selectedSize
+      }
+      
+      customerInfo {
+        firstName
+        lastName
+        email
+        phone
+        address
+        apartment
+        city
+        province
+        zipCode
+      }
+      
+      paymentMethod {
+        id
+        name
+        description
+      }
+      mercadoPagoPaymentId
+    }
+  }
+`;

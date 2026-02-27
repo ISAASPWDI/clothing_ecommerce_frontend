@@ -6,8 +6,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+// NUEVOS IMPORTS DE SHADCN/UI PARA EL MODAL DE ALERTA
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useMutation } from '@apollo/client';// Ajusta la ruta según tu estructura
 import {
@@ -61,6 +71,13 @@ const PROVINCIAS_ARGENTINA = [
   'Ciudad Autónoma de Buenos Aires'
 ];
 
+// Definición del tipo para el estado del modal de error
+interface ErrorModalState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+}
+
 export default function CheckoutPage() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -68,6 +85,18 @@ export default function CheckoutPage() {
 
   // Mutation de Apollo
   const [crearPreferenciaPago, { loading: mercadoPagoLoading, error: mercadoPagoError }] = useMutation(CREATE_PAYMENT_PREFERENCE);
+
+  // ESTADO PARA EL MODAL DE ERROR
+  const [errorModal, setErrorModal] = useState<ErrorModalState>({
+    isOpen: false,
+    title: '',
+    description: '',
+  });
+
+  // Función para mostrar el modal de error
+  const showErrorMessage = (title: string, description: string) => {
+    setErrorModal({ isOpen: true, title, description });
+  };
 
   useEffect(() => {
     if (totalItems === 0) {
@@ -125,128 +154,138 @@ export default function CheckoutPage() {
     }
   };
 
-  // Validación del formulario
-  const validateForm = () => {
+  // Validación del formulario MODIFICADA PARA USAR EL MODAL
+  const validateForm = useCallback(() => {
     if (!email || !firstName || !lastName || !address || !province || !zipCode || !phone) {
-      alert('Por favor, completa todos los campos obligatorios');
+      showErrorMessage(
+        'Campos incompletos',
+        'Por favor, completa todos los campos obligatorios para continuar con la compra.'
+      );
       return false;
     }
 
     // Validación básica de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert('Por favor, ingresa un email válido');
+      showErrorMessage(
+        'Email inválido',
+        'Por favor, ingresa un formato de correo electrónico válido (ej. tu@email.com).'
+      );
       return false;
     }
 
     return true;
-  };
+  }, [email, firstName, lastName, address, province, zipCode, phone]);
 
-const handleMercadoPagoCheckout = async () => {
-  if (!validateForm()) {
-    return;
-  }
-
-  setIsProcessing(true);
-  setProcessingMethod('mercadopago');
-
-  try {
-    const mercadoPagoItems = items.map(item => ({
-      id: item.id.toString(),
-      title: item.name,
-      description: `${item.selectedColorName ? `Color: ${item.selectedColorName}` : ''} ${item.selectedSizeName ? `Talle: ${item.selectedSizeName}` : ''}`.trim(),
-      quantity: item.quantity,
-      unit_price: item.price,
-      currency_id: "ARS",
-      category_id: "retail"
-    }));
-
-    const payerInfo = {
-      email: email,
-      name: firstName,
-      surname: lastName,
-      phone: {
-        area_code: phone.substring(0, 3).replace(/\D/g, ''),
-        number: phone.replace(/\D/g, '').substring(3)
-      },
-      address: {
-        street_name: address,
-        street_number: apartment ? parseInt(apartment) : undefined,
-        zip_code: zipCode
-      }
-    };
-
-    // Usar ngrok URL o variable de entorno
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://tu-ngrok-url.ngrok-free.app';
-    
-    const backUrls = {
-      success: `${baseUrl}/checkout/success`,
-      failure: `${baseUrl}/checkout/failure`,
-      pending: `${baseUrl}/checkout/pending`
-    };
-
-    console.log('URLs de retorno:', backUrls);
-    
-    const { data } = await crearPreferenciaPago({
-      variables: {
-        input: {
-          items: mercadoPagoItems,
-          payer: payerInfo,
-          back_urls: backUrls,
-          auto_return: "approved", // ← Asegúrate que esto se envíe
-          external_reference: `ORDER-${Date.now()}`,
-          statement_descriptor: "TU_TIENDA",
-          binary_mode: false,
-          payment_methods: {
-            installments: 12
-          },
-          expires: true,
-          expiration_date_from: new Date().toISOString(),
-          expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        }
-      }
-    });
-
-    console.log('Preferencia creada:', data);
-
-    if (data?.crearPreferenciaPago?.initPoint) {
-      // Guardar información del pedido
-      if (saveInfo) {
-        localStorage.setItem('customerInfo', JSON.stringify({
-          firstName, lastName, email, address, apartment,
-          city, province, zipCode, phone
-        }));
-      }
-
-      const externalRef = `ORDER-${Date.now()}`;
-      localStorage.setItem('pendingOrder', JSON.stringify({
-        items: items,
-        total: totalPrice,
-        customerInfo: { firstName, lastName, email, phone, address },
-        externalReference: externalRef,
-        timestamp: Date.now()
-      }));
-
-      console.log('External reference guardada:', externalRef);
-
-      // Redirigir a MercadoPago
-      const checkoutUrl = data.crearPreferenciaPago.sandboxInitPoint || 
-                          data.crearPreferenciaPago.initPoint;
-      
-      console.log('Redirigiendo a:', checkoutUrl);
-      window.location.href = checkoutUrl;
-    } else {
-      throw new Error('No se pudo obtener el link de pago');
+  const handleMercadoPagoCheckout = async () => {
+    if (!validateForm()) {
+      return;
     }
 
-  } catch (error) {
-    console.error('Error al crear preferencia de MercadoPago:', error);
-    alert('Hubo un error al procesar el pago. Por favor, intenta nuevamente.');
-  } finally {
-    setIsProcessing(false);
-    setProcessingMethod(null);
-  }
-};
+    setIsProcessing(true);
+    setProcessingMethod('mercadopago');
+
+    try {
+      const mercadoPagoItems = items.map(item => ({
+        id: item.id.toString(),
+        title: item.name,
+        description: `${item.selectedColorName ? `Color: ${item.selectedColorName}` : ''} ${item.selectedSizeName ? `Talle: ${item.selectedSizeName}` : ''}`.trim(),
+        quantity: item.quantity,
+        unit_price: item.price,
+        currency_id: "ARS",
+        category_id: "retail"
+      }));
+
+      const payerInfo = {
+        email: email,
+        name: firstName,
+        surname: lastName,
+        phone: {
+          area_code: phone.substring(0, 3).replace(/\D/g, ''),
+          number: phone.replace(/\D/g, '').substring(3)
+        },
+        address: {
+          street_name: address,
+          street_number: apartment ? parseInt(apartment) : undefined,
+          zip_code: zipCode
+        }
+      };
+
+      // Usar ngrok URL o variable de entorno
+      const baseUrl = process.env.FRONTEND_URL;
+
+      const backUrls = {
+        success: `${baseUrl}/checkout/success`,
+        failure: `${baseUrl}/checkout/failure`,
+        pending: `${baseUrl}/checkout/pending`
+      };
+
+      console.log('URLs de retorno:', backUrls);
+
+      const { data } = await crearPreferenciaPago({
+        variables: {
+          input: {
+            items: mercadoPagoItems,
+            payer: payerInfo,
+            back_urls: backUrls,
+            auto_return: "approved", // ← Asegúrate que esto se envíe
+            external_reference: `ORDER-${Date.now()}`,
+            statement_descriptor: "TU_TIENDA",
+            binary_mode: false,
+            payment_methods: {
+              installments: 12
+            },
+            expires: true,
+            expiration_date_from: new Date().toISOString(),
+            expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          }
+        }
+      });
+
+      console.log('Preferencia creada:', data);
+
+      if (data?.crearPreferenciaPago?.initPoint) {
+        // Guardar información del pedido
+        if (saveInfo) {
+          localStorage.setItem('customerInfo', JSON.stringify({
+            firstName, lastName, email, address, apartment,
+            city, province, zipCode, phone
+          }));
+        }
+
+        const externalRef = `ORDER-${Date.now()}`;
+        localStorage.setItem('pendingOrder', JSON.stringify({
+          items: items,
+          total: totalPrice,
+          customerInfo: { firstName, lastName, email, phone, address },
+          externalReference: externalRef,
+          timestamp: Date.now()
+        }));
+
+        console.log('External reference guardada:', externalRef);
+
+        // Redirigir a MercadoPago
+        // const checkoutUrl = data.crearPreferenciaPago.sandboxInitPoint ||
+        //   data.crearPreferenciaPago.initPoint;
+        const checkoutUrl = data.crearPreferenciaPago.initPoint;
+
+        console.log('Redirigiendo a:', checkoutUrl);
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error('No se pudo obtener el link de pago');
+      }
+
+    } catch (error) {
+      console.error('Error al crear preferencia de MercadoPago:', error);
+      showErrorMessage(
+        'Error de Pago',
+        'Hubo un error al procesar el pago con Mercado Pago. Por favor, intenta nuevamente más tarde.'
+      );
+    } finally {
+      setIsProcessing(false);
+      setProcessingMethod(null);
+    }
+  };
 
   const handleGooglePayCheckout = async () => {
     // Validar formulario
@@ -269,7 +308,10 @@ const handleMercadoPagoCheckout = async () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // dispatch(clearCart());
-      alert('Google Pay aún no está implementado');
+      showErrorMessage(
+        'Función no disponible',
+        'El método de pago con Google Pay aún no está implementado. Por favor, utiliza otra opción.'
+      );
 
     } catch (error) {
       console.error('Error en el checkout:', error);
@@ -279,11 +321,14 @@ const handleMercadoPagoCheckout = async () => {
     }
   };
 
-  // Mostrar error de MercadoPago si existe
+  // Mostrar error de MercadoPago si existe (usando el modal)
   useEffect(() => {
     if (mercadoPagoError) {
       console.error('Error de MercadoPago:', mercadoPagoError);
-      alert('Error al conectar con MercadoPago. Por favor, intenta nuevamente.');
+      showErrorMessage(
+        'Error de Conexión',
+        'Error al conectar con MercadoPago. Por favor, revisa tu conexión o intenta de nuevo.'
+      );
     }
   }, [mercadoPagoError]);
 
@@ -423,7 +468,7 @@ const handleMercadoPagoCheckout = async () => {
                               })
                             }
                           >
-                            <SelectTrigger className="w-full h-12 px-3 py-0 border border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 !h-12">
+                            <SelectTrigger className="w-full h-12 px-3 py-0 border border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100">
                               <SelectValue placeholder="Seleccionar" />
                             </SelectTrigger>
                             <SelectContent>
@@ -485,6 +530,7 @@ const handleMercadoPagoCheckout = async () => {
                       placeholder="+54 11 1234-5678"
                       autoComplete="tel"
                     />
+
                   </div>
                 </div>
 
@@ -524,23 +570,25 @@ const handleMercadoPagoCheckout = async () => {
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* MercadoPago */}
-                      <button
-                        onClick={handleMercadoPagoCheckout}
-                        disabled={isProcessing || mercadoPagoLoading}
-                        className="group relative w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                      >
-                        {isProcessing && processingMethod === 'mercadopago' || mercadoPagoLoading ? (
-                          <div className="flex items-center space-x-2">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            <span>Procesando...</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center space-x-2">
-                            <CreditCard className="h-5 w-5" />
-                            <span>MercadoPago</span>
-                          </div>
-                        )}
-                      </button>
+                      <div className="bg-[url('../public/MERCADO-PAGO.jpg')] bg-cover bg-center rounded-xl h-16 w-full">
+                        <button
+                          onClick={handleMercadoPagoCheckout}
+                          disabled={isProcessing || mercadoPagoLoading}
+                          className="w-full h-full flex items-center justify-center text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 cursor-pointer"
+                        >
+                          {isProcessing && processingMethod === 'mercadopago' || mercadoPagoLoading ? (
+                            <div className="flex items-center space-x-2 bg-[#fee600] rounded-xl p-2 h-full">
+                              <div className="w-6 h-6 border-4 border-black border-t-transparent rounded-full animate-spin" />
+                              <span className="h-full text-black">Procesando...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span className="opacity-0">Pagar con Mercado Pago</span>
+                            </div>
+                          )}
+                        </button>
+                      </div>
+
 
                       {/* Google Pay */}
                       <button
@@ -576,6 +624,7 @@ const handleMercadoPagoCheckout = async () => {
                         type="checkbox"
                         name="saveInfo"
                         checked={saveInfo}
+                        // Usamos handleSpecialInputChange que ya maneja checkbox
                         onChange={handleSpecialInputChange}
                         className="h-5 w-5 text-purple-600 dark:text-purple-600 focus:ring-purple-500 dark:focus:ring-purple-400 border-gray-300 dark:border-[#3a393b] rounded transition-colors duration-200 bg-white dark:bg-[#1a1a1b]"
                       />
@@ -703,6 +752,26 @@ const handleMercadoPagoCheckout = async () => {
           </div>
         </div>
       </div>
+
+      {/* MODAL DE ALERTA DE ERROR */}
+      <AlertDialog open={errorModal.isOpen} onOpenChange={(isOpen) => setErrorModal({ ...errorModal, isOpen })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-500 dark:text-red-400">
+              <Info className="inline-block h-6 w-6 mr-2 mb-1" />
+              {errorModal.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorModal.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setErrorModal({ ...errorModal, isOpen: false })} className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-700 dark:hover:bg-purple-600">
+              Entendido
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <style jsx>{`
         @keyframes fade-in-down {

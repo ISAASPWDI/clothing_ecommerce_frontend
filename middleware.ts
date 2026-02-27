@@ -10,14 +10,19 @@ export async function middleware(req: NextRequest) {
     pathname.includes("/api/auth/callback") ||
     pathname.includes("/api/auth/session");
 
-  if (isAuthCallback) {
+
+  const isPaymentCallback =
+    pathname.startsWith("/checkout/success") ||
+    pathname.startsWith("/checkout/failure") ||
+    pathname.startsWith("/checkout/pending");
+
+  if (isAuthCallback || isPaymentCallback) {
     return NextResponse.next();
   }
 
   // Si NO hay token (usuario no logueado)
   if (!token) {
     if (pathname.startsWith("/account") || pathname.startsWith("/checkout")) {
-      // Guardamos callbackUrl para volver luego
       const callbackUrl = encodeURIComponent(req.nextUrl.href);
       return NextResponse.redirect(
         new URL(`/login?callbackUrl=${callbackUrl}`, req.url)
@@ -27,7 +32,6 @@ export async function middleware(req: NextRequest) {
     // ✅ Usuario logueado
     console.log("Usuario logeado");
 
-    // Si intenta entrar a login, registro o fallback → mándalo al account
     if (
       pathname.startsWith("/login") ||
       pathname.startsWith("/registration") ||
@@ -36,25 +40,21 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/account", req.url));
     }
 
-    // Protección adicional para checkout: verificar si hay items en el carrito
-    if (pathname.startsWith("/checkout")) {
-      // Obtener el carrito desde las cookies o headers
+    // Protección adicional para checkout (excepto callbacks de pago)
+    if (pathname.startsWith("/checkout") && !isPaymentCallback) {
       const cartCookie = req.cookies.get('cart');
       
       if (!cartCookie) {
-        // Si no hay cookie del carrito, redirigir al shop
         return NextResponse.redirect(new URL("/shop", req.url));
       }
 
       try {
         const cartData = JSON.parse(cartCookie.value);
         
-        // Si el carrito está vacío, redirigir al carrito
         if (!cartData.items || cartData.items.length === 0) {
           return NextResponse.redirect(new URL("/cart", req.url));
         }
       } catch (error) {
-        // Si hay error al parsear el carrito, redirigir al shop
         console.error("Error parsing cart cookie:", error);
         return NextResponse.redirect(new URL("/shop", req.url));
       }

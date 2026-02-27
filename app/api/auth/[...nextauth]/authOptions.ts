@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { NextAuthOptions } from "next-auth";
 import client from "../../../../apolloClient";
 import { CREATE_USER, FIND_USER_BY_EMAIL, LOGIN_USER } from "@/app/queriesGraphQL";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -50,6 +51,22 @@ export const authOptions: NextAuthOptions = {
       }
     }),
   ],
+  
+
+  // useSecureCookies: false,
+  
+  // cookies: {
+  //   sessionToken: {
+  //     name: `next-auth.session-token`,
+  //     options: {
+  //       httpOnly: true,
+  //       sameSite: 'lax',
+  //       path: '/',
+  //       secure: false,
+  //     },
+  //   },
+  // },
+  
   callbacks: {
     async signIn({ user, account }) {
       let dbUser = null;
@@ -92,7 +109,6 @@ export const authOptions: NextAuthOptions = {
             console.log("Google user already exists:", dbUser);
           }
 
-          // Guardar en el objeto `user` para que pase al callback `jwt`
           user.id = dbUser.id;
           user.firstName = dbUser.firstName;
           user.lastName = dbUser.lastName;
@@ -102,18 +118,16 @@ export const authOptions: NextAuthOptions = {
           user.token = dbUser.token;
         } catch (error) {
           console.error("Error in Google signIn:", error);
-          return false; // ❌ Esto sí es válido
+          return false;
         }
       }
 
-      return true; // ✅ Esto resuelve el error de TypeScript
+      return true;
     },
-
 
     async jwt({ token, user, trigger }) {
       console.log("JWT callback triggered:", trigger);
     
-      // Primer inicio de sesión
       if (user) {
         token.userId    = user.id;
         token.firstName = user.firstName;
@@ -124,7 +138,6 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.token;
       }
     
-      // Siempre recargamos desde la BD para mantener datos frescos
       try {
         const { data } = await client.query({
           query: FIND_USER_BY_EMAIL,
@@ -134,8 +147,6 @@ export const authOptions: NextAuthOptions = {
     
         const u = data?.getUserByEmail;
         if (u) {
-          // **Actualiza TODOS** los campos
-          //TODO se puede agregar img aqui
           token.firstName   = u.firstName;
           token.lastName    = u.lastName;
           token.phone       = u.phone;
@@ -149,12 +160,10 @@ export const authOptions: NextAuthOptions = {
       console.log("Final token:", token);
       return token;
     },
-    
 
     async session({ session, token }) {
       console.log("Session callback with token:", { ...token });
 
-      // Ensure user object exists
       if (!session.user) {
         session.user = {
           id: "",
@@ -176,7 +185,6 @@ export const authOptions: NextAuthOptions = {
       session.user.authType = token.authType || "PROVIDER";
       session.user.phone = token.phone || "";
 
-
       console.log("Final session state:", {
         user: { ...session.user },
         accessToken: session.accessToken
@@ -185,13 +193,16 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
+  
   pages: {
     signIn: '/login',
     error: '/login',
   },
+  
   session: {
     strategy: 'jwt',
   },
+  
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
 }

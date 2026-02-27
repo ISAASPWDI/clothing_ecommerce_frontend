@@ -87,8 +87,8 @@ export default function CategoryContent({ categoryInfo }: CategoryContentProps) 
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white dark:bg-[#302f31] p-4 rounded-lg shadow-md dark:shadow-lg">
+          <div className="hidden lg:block lg:col-span-1 ">
+            <div className="bg-white dark:bg-[#302f31] p-4 rounded-lg shadow-md dark:shadow-lg sticky top-24">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-gray-100">Filtros</h2>
                 <button

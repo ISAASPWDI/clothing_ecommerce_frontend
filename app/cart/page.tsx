@@ -16,6 +16,19 @@ import Layout from '@/app/shop/LayoutContent';
 import { RootState } from '../store/store';
 import { useProductContext } from '@/contexts/ProductContext';
 
+// 1. Importamos los componentes de Shadcn UI
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 export default function CartPage() {
   const { navigateToProduct } = useProductContext();
   const dispatch = useDispatch();
@@ -34,24 +47,17 @@ export default function CartPage() {
     dispatch(decreaseQuantity({ id, selectedColor, selectedSize }));
   };
 
-  const handleClearCart = () => {
-    if (window.confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
-      dispatch(clearCart());
-    }
-  };
+  // Eliminamos handleClearCart antiguo ya que la lógica va dentro del modal
 
   const handleProceedToCheckout = () => {
-    // Verificar que hay items en el carrito
     if (items.length === 0) {
+      // Nota: Aquí también podrías usar un toast o un modal simple en lugar de alert()
       alert('Tu carrito está vacío');
       return;
     }
 
-    // Guardar carrito en cookies para el middleware
     const cartData = { items, totalItems, totalPrice };
-    document.cookie = `cart=${JSON.stringify(cartData)}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 días
-
-    // Navegar a checkout
+    document.cookie = `cart=${JSON.stringify(cartData)}; path=/; max-age=${60 * 60 * 24 * 7}`;
     router.push('/checkout');
   };
 
@@ -74,7 +80,6 @@ export default function CartPage() {
       </Layout>
     );
   }
-
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -89,12 +94,39 @@ export default function CartPage() {
           </Link>
 
           {items.length > 0 && (
-            <button
-              onClick={handleClearCart}
-              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
-            >
-              Vaciar carrito
-            </button>
+            /* 2. Implementación del AlertDialog */
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium">
+                  Vaciar carrito
+                </button>
+              </AlertDialogTrigger>
+
+              {/* Lógica Dual: Blanco por defecto | #302f31 en modo oscuro */}
+              <AlertDialogContent className="bg-white dark:bg-[#302f31] dark:border-[#302f31]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-gray-900 dark:text-white">
+                    ¿Estás absolutamente seguro?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-500 dark:text-gray-300">
+                    Esta acción no se puede deshacer. Esto eliminará todos los productos de tu carrito de compras permanentemente.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  {/* Botón Cancelar adaptable */}
+                  <AlertDialogCancel className="bg-white text-gray-900 border-gray-200 hover:bg-gray-100 dark:bg-transparent dark:text-white dark:border-gray-500 dark:hover:bg-white/10 dark:hover:text-white">
+                    Cancelar
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    onClick={() => dispatch(clearCart())}
+                    className="bg-red-600 hover:bg-red-700 text-white border-0"
+                  >
+                    Sí, vaciar carrito
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
 
@@ -205,7 +237,7 @@ export default function CartPage() {
 
           {/* Resumen del pedido */}
           <div className="lg:col-span-4 mt-8 lg:mt-0">
-            <div className="bg-gray-50 dark:bg-[#302f31] rounded-lg p-6 sticky top-8 border border-gray-200 dark:border-[#3a393b]">
+            <div className="bg-gray-50 dark:bg-[#302f31] rounded-lg p-6 sticky top-8 border border-gray-200 dark:border-[#3a393b] shadow-xl">
               <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
                 Resumen del Pedido
               </h2>

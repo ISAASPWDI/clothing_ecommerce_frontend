@@ -4,6 +4,7 @@ import { useForm } from '@/app/hooks/useForm';
 import { useHelpPassword } from '@/app/hooks/useHelpPassword';
 import { UPDATE_USER } from '@/app/queriesGraphQL';
 import { useMutation } from '@apollo/client';
+import { useSession } from 'next-auth/react';
 import { FormEvent, useEffect, useRef, useState } from 'react'
 
 interface SessionOptions {
@@ -37,11 +38,11 @@ interface UpdateUserInput {
 }
 
 export default function Profile({ session }: SessionOptions) {
+    const { update } = useSession();
     const { formState, onInputChange, setFormState } = useForm({
         firstName: "",
         lastName: "",
         phone: "",
-        // image: "",
         newPassword: "",
         confirmPassword: "",
     });
@@ -66,6 +67,10 @@ export default function Profile({ session }: SessionOptions) {
         setTimeout(() => {
             errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 10);
+        // Limpiar mensaje de error después de 3 segundos
+        setTimeout(() => {
+            setMessage({ text: "", type: "" });
+        }, 3000);
     };
     const [updateUser] = useMutation<UpdateUserInput>(UPDATE_USER);
 
@@ -131,19 +136,53 @@ export default function Profile({ session }: SessionOptions) {
             }
 
             console.log("Datos enviados para actualización:", JSON.stringify(userData, null, 2));
-            console.log("Datos enviados para actualización:", JSON.stringify(userData, null, 2));
             console.log("Token utilizado:", session?.accessToken);
+            
             await updateUser({
                 variables: {
                     data: userData,
                 },
             });
 
+            // Actualizar la sesión de NextAuth con los nuevos datos
+            await update({
+                user: {
+                    ...session?.user,
+                    firstName: formState.firstName.trim(),
+                    lastName: formState.lastName.trim(),
+                    phone: formState.phone?.trim() || null,
+                    name: `${formState.firstName.trim()} ${formState.lastName.trim()}`,
+                }
+            });
+
+            // Actualizar los valores iniciales con los nuevos datos guardados
+            const newInitialValues = {
+                firstName: formState.firstName.trim(),
+                lastName: formState.lastName.trim(),
+                phone: formState.phone?.trim() || "",
+            };
+            
+            setInitialValues(newInitialValues);
+            
+            // Limpiar los campos de contraseña
+            setFormState(prev => ({
+                ...prev,
+                newPassword: "",
+                confirmPassword: "",
+            }));
+
             setMessage({ text: "Profile updated successfully", type: "success" });
             setHasChanges(false);
+            
+            // Auto-scroll al mensaje de éxito
             setTimeout(() => {
                 errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             }, 10);
+
+            // Limpiar mensaje de éxito después de 2 segundos
+            setTimeout(() => {
+                setMessage({ text: "", type: "" });
+            }, 2000);
         } catch (error) {
             if (error instanceof Error) {
                 scrollToError(error.message);
@@ -226,16 +265,6 @@ export default function Profile({ session }: SessionOptions) {
                         placeholder="Enter your phone number"
                         autoComplete="tel"
                     />
-
-                    {/* <FormStyle
-                        label="Date of Birth"
-                        type="date"
-                        name="dateOfBirth"
-                        value={formState.dateOfBirth}
-                        onChange={onInputChange}
-                        placeholder="mm/dd/yyyy"
-                        autoComplete="bday"
-                    /> */}
                 </div>
 
                 <h2 className="font-bold text-xl mt-10 mb-6">Cambiar contraseña</h2>
